@@ -566,17 +566,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[oklch(0.98_0.001_286)]">
-      {/* 스티키 헤더 */}
-      <header className="sticky top-0 z-50 bg-white border-b border-[oklch(0.92_0.004_286)]">
-        <div className="container flex items-center justify-between py-3">
-          <h1 className="text-lg font-bold text-[oklch(0.18_0.04_255)]">티켓나라 스타필드수원</h1>
+      {/* 스티키 헤더 - 이전 디자인 복원 */}
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-[oklch(0.18_0.04_255)] to-[oklch(0.25_0.04_255)] text-white shadow-md">
+        <div className="container flex items-center justify-between py-4">
+          <h1 className="text-xl font-bold">티켓나라 스타필드수원</h1>
           <div className="flex items-center gap-3">
             {isAdmin && (
               <>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-white/70">
                   {hasChanges ? "변경됨" : lastSaved ? `저장됨 ${lastSaved.toLocaleTimeString("ko-KR")}` : ""}
                 </span>
-                <Button size="sm" onClick={handleSave} disabled={!hasChanges}>
+                <Button size="sm" onClick={handleSave} disabled={!hasChanges} className="bg-white/20 hover:bg-white/30 text-white">
                   <Save className="w-4 h-4 mr-1" />
                   저장
                 </Button>
@@ -584,7 +584,7 @@ export default function Home() {
             )}
             <button
               onClick={() => (isAdmin ? handleLogout() : setLoginOpen(true))}
-              className="text-[oklch(0.78_0.12_80)] hover:text-[oklch(0.6_0.15_80)] transition-colors"
+              className="text-white/80 hover:text-white transition-colors"
               title={isAdmin ? "로그아웃" : "관리자 로그인"}
             >
               {isAdmin ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
@@ -618,7 +618,9 @@ export default function Home() {
                 <MapPin className="w-6 h-6 text-[oklch(0.78_0.12_80)]" />
                 <div>
                   <p className="text-sm text-white/70">위치</p>
-                  <p className="text-lg font-semibold">수원시 장안구 수성로 157번길60</p>
+                  <p className="text-sm font-semibold">수원시 장안구 수성로 157번길60</p>
+                  <p className="text-xs text-white/60">[화서역푸르지오 브리시엘상가 133호]</p>
+                  <p className="text-xs text-white/60">[상가주차장 1시간 무료]</p>
                 </div>
               </div>
             </div>
@@ -630,7 +632,7 @@ export default function Home() {
           <div className="container">
             <div className="bg-[oklch(0.97_0.005_255)] rounded-lg p-6 border border-[oklch(0.92_0.004_286)]">
               <h3 className="text-lg font-bold text-[oklch(0.18_0.04_255)] mb-4 text-center">거래 안내사항</h3>
-              <ul className="space-y-2 text-center text-sm text-[oklch(0.35_0.05_65)]">
+              <ul className="space-y-2 text-center text-base text-[oklch(0.35_0.05_65)]">
                 <li>- 구매시 방문 현금결제만 가능합니다. (수표, 카드X)</li>
                 <li>- 상품권 거래시 시세표와 길이 거래합니다. (도착담시 시세 적용)</li>
                 <li>- 상품권 판매시 원칙적으로 가능 시세번호 (문의바람)</li>
@@ -674,10 +676,10 @@ export default function Home() {
                 <p className="text-xs text-white/60 mt-2">77개 카테고리 / 총 78개 항목</p>
               </div>
 
-              {/* 테이블 */}
+              {/* 테이블 - Sticky 헤더 */}
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
+                <table className="w-full border-collapse">
+                  <thead className="sticky top-[73px] z-40 bg-[oklch(0.18_0.04_255)]">
                     <tr className="bg-[oklch(0.18_0.04_255)]">
                       <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">상품권명</th>
                       <th className="bg-[oklch(0.93_0.02_200)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider">파실때(이체)</th>
@@ -735,6 +737,47 @@ export default function Home() {
           </div>
         </section>
       </main>
+
+      {/* 네이버 지도 섹션 */}
+      <section className="py-12 bg-white border-t border-[oklch(0.92_0.004_286)]">
+        <div className="container">
+          <h3 className="text-2xl font-bold text-[oklch(0.18_0.04_255)] mb-6 text-center">매장 위치</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <p className="text-base text-[oklch(0.35_0.05_65)] mb-4 leading-relaxed">
+                <strong>티켓나라 스타필드수원</strong><br />
+                수원시 장안구 수성로 157번길60<br />
+                [화서역푸르지오 브리시엘상가 133호]<br />
+                <br />
+                <span className="text-[oklch(0.78_0.12_80)] font-semibold">☎ 010-9650-5566</span><br />
+                <span className="text-sm text-[oklch(0.5_0.02_255)]">영업시간: 10:00 ~ 19:00</span><br />
+                <span className="text-sm text-[oklch(0.5_0.02_255)]">상가주차장 1시간 무료</span>
+              </p>
+              <a
+                href="https://map.naver.com/search/%EC%88%98%EC%9B%90%EC%8B%9C%20%EC%9E%A5%EC%95%88%EA%B5%AC%20%EC%88%98%EC%84%B1%EB%A1%9C%20157%EB%B2%88%EA%B8%B8"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[oklch(0.78_0.12_80)] text-white font-semibold rounded-lg hover:bg-[oklch(0.7_0.12_80)] transition-colors"
+              >
+                <MapPin className="w-5 h-5" />
+                네이버 지도에서 확인
+              </a>
+            </div>
+            <div className="bg-[oklch(0.93_0.01_255)] rounded-lg p-6 text-center">
+              <p className="text-sm text-[oklch(0.5_0.02_255)] mb-4">지도를 보려면 아래 버튼을 클릭하세요</p>
+              <a
+                href="https://map.naver.com/search/%EC%88%98%EC%9B%90%EC%8B%9C%20%EC%9E%A5%EC%95%88%EA%B5%AC%20%EC%88%98%EC%84%B1%EB%A1%9C%20157%EB%B2%88%EA%B8%B8"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-[oklch(0.78_0.12_80)] text-white font-bold text-lg rounded-lg hover:bg-[oklch(0.7_0.12_80)] transition-colors"
+              >
+                <MapPin className="w-6 h-6" />
+                지도 열기
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 다이얼로그들 */}
       <AdminLoginDialog

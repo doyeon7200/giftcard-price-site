@@ -46,11 +46,11 @@
 }
 
 :root {
-  /* Design: Deep Navy + Gold (#FFA500) — 신뢰·안정·가치 */
+  /* Design: Deep Navy + Gold (#c9a227) — 신뢰·안정·가치 */
   --navy: oklch(0.18 0.04 255);
   --navy-light: oklch(0.24 0.05 255);
-  --gold: #FFA500;
-  --gold-dark: #FF8C00;
+  --gold: oklch(0.78 0.12 80);
+  --gold-dark: oklch(0.65 0.13 78);
 
   --radius: 0.5rem;
   --background: oklch(0.97 0.005 255);
@@ -65,15 +65,15 @@
   --secondary-foreground: oklch(0.3 0.04 255);
   --muted: oklch(0.93 0.01 255);
   --muted-foreground: oklch(0.5 0.02 255);
-  --accent: #FFA500;
+  --accent: oklch(0.78 0.12 80);
   --accent-foreground: oklch(0.15 0.04 255);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.88 0.01 255);
   --input: oklch(0.88 0.01 255);
-  --ring: #FFA500;
-  --chart-1: #FFA500;
-  --chart-2: #FF8C00;
+  --ring: oklch(0.78 0.12 80);
+  --chart-1: oklch(0.78 0.12 80);
+  --chart-2: oklch(0.65 0.13 78);
   --chart-3: oklch(0.5 0.1 255);
   --chart-4: oklch(0.35 0.07 255);
   --chart-5: oklch(0.25 0.05 255);
