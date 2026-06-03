@@ -616,7 +616,7 @@ export default function Home() {
         <section className="bg-gradient-to-r from-[oklch(0.18_0.04_255)] to-[oklch(0.25_0.04_255)] text-white py-8 md:py-12">
           <div className="container">
             <h2 className="text-3xl md:text-4xl font-bold mb-2 text-[oklch(0.85_0.15_80)]">상품권 매입·판매</h2>
-            <p className="text-lg md:text-xl text-white/80 mb-6 md:mb-8">최신 시세 안내</p>
+            <p className="text-lg md:text-xl text-white/80 mb-6 md:mb-8">국내 최대 상품권 전문거래소 -티켓나라</p>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
               <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
                 <Phone className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
@@ -636,7 +636,7 @@ export default function Home() {
                 <MapPin className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
                 <div>
                   <p className="text-xs md:text-sm text-white/70">위치</p>
-                  <p className="text-sm md:text-base font-semibold">수원시 장안구 수성로 157번길60</p>
+                  <p className="text-sm md:text-base font-semibold">수원시 장안구 수성로 157번길60 [브리시엘상가 133호]</p>
                 </div>
               </div>
               <a href="https://pf.kakao.com/_xnxnxnxn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-lg p-4 transition-colors">
