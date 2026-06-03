@@ -716,9 +716,9 @@ export default function Home() {
                     <tr className="bg-[oklch(0.18_0.04_255)]">
                       <th className="px-2 md:px-3 py-3 text-center text-xs md:text-sm font-bold text-white/80 uppercase tracking-wider">상품권명</th>
                       <th className="bg-[oklch(0.93_0.02_200)] px-1.5 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider">파실때</th>
-                      <th className="bg-[oklch(0.93_0.02_200)] px-1 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider hidden md:table-cell">할인율</th>
+                      <th className="bg-[oklch(0.93_0.02_200)] px-1 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider">할인율</th>
                       <th className="bg-[oklch(0.93_0.02_10)] px-1.5 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider">사실때</th>
-                      <th className="bg-[oklch(0.93_0.02_10)] px-1 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider hidden md:table-cell">할인율</th>
+                      <th className="bg-[oklch(0.93_0.02_10)] px-1 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider">할인율</th>
                       <th className="px-1.5 md:px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider hidden md:table-cell">비고</th>
                       {isAdmin && <th className="px-1.5 md:px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">관리</th>}
                     </tr>
@@ -763,68 +763,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 네이버 지도 섹션 */}
-        <section className="py-8 md:py-12 bg-[oklch(0.97_0.005_255)] border-t border-[oklch(0.88_0.01_255)]">
-          <div className="container">
-            <h3 className="text-2xl md:text-3xl font-bold text-[oklch(0.18_0.04_255)] mb-6 text-center">매장 위치</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              {/* 네이버 지도 박스 */}
-              <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] overflow-hidden shadow-sm h-[300px] md:h-[400px]">
-                <iframe
-                  src="https://map.naver.com/search/%EC%88%98%EC%9B%90%EC%8B%9C%20%EC%9E%A5%EC%95%88%EA%B5%AC%20%EC%88%98%EC%84%B1%EB%A1%9C%20157%EB%B2%88%EA%B8%B8/map"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  scrolling="no"
-                  marginHeight={0}
-                  marginWidth={0}
-                  title="티켓나라 스타필드수원 위치"
-                  style={{ border: 'none' }}
-                />
-              </div>
-              {/* 정보 박스 */}
-              <div className="flex flex-col justify-center">
-                <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] p-6 md:p-8 shadow-sm">
-                  <h4 className="text-xl md:text-2xl font-bold text-[oklch(0.18_0.04_255)] mb-4">티켓나라 스타필드수원</h4>
-                  <div className="space-y-4 text-sm md:text-base text-muted-foreground">
-                    <div className="flex gap-3">
-                      <MapPin className="w-5 h-5 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold text-[oklch(0.18_0.04_255)]">주소</p>
-                        <p>수원시 장안구 수성로 157번길60</p>
-                        <p className="text-xs text-[oklch(0.5_0.02_255)]">[화서역푸르지오 브리시엘상가 133호]</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <Phone className="w-5 h-5 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold text-[oklch(0.18_0.04_255)]">전화</p>
-                        <p>010-9650-5566</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <Clock className="w-5 h-5 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold text-[oklch(0.18_0.04_255)]">영업시간</p>
-                        <p>10:00 ~ 19:00</p>
-                        <p className="text-xs text-[oklch(0.5_0.02_255)]">[상가주차장 1시간 무료]</p>
-                      </div>
-                    </div>
-                  </div>
-                  <a
-                    href="https://map.naver.com/search/%EC%88%98%EC%9B%90%EC%8B%9C%20%EC%9E%A5%EC%95%88%EA%B5%AC%20%EC%88%98%EC%84%B1%EB%A1%9C%20157%EB%B2%88%EA%B8%B8"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[oklch(0.78_0.12_80)] text-white font-semibold rounded-lg hover:bg-[oklch(0.65_0.13_78)] transition-colors text-sm md:text-base"
-                  >
-                    <MapPin className="w-5 h-5" />
-                    네이버 지도에서 확인
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+
       </main>
 
       {/* 다이얼로그들 */}
