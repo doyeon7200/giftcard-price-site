@@ -367,8 +367,8 @@ function PriceRow({
           </span>
         )}
       </td>
-      {/* 파실때 할인율 - 모바일에서 숨김 */}
-      <td className={`${sellBg} px-1 md:px-3 py-3 text-xs font-bold text-[oklch(0.3_0.08_200)] text-center hidden md:table-cell`}>
+      {/* 파실때 할인율 */}
+      <td className={`${sellBg} px-1 md:px-3 py-3 text-xs font-bold text-[oklch(0.3_0.08_200)] text-center`}>
         {isAdmin && editing === "sellDiscount" ? (
           <input
             ref={inputRef}
@@ -410,8 +410,8 @@ function PriceRow({
           </span>
         )}
       </td>
-      {/* 사실때 할인율 - 모바일에서 숨김 */}
-      <td className={`${buyBg} px-1 md:px-3 py-3 text-xs font-bold text-[oklch(0.3_0.08_10)] text-center hidden md:table-cell`}>
+      {/* 사실때 할인율 */}
+      <td className={`${buyBg} px-1 md:px-3 py-3 text-xs font-bold text-[oklch(0.3_0.08_10)] text-center`}>
         {isAdmin && editing === "buyDiscount" ? (
           <input
             ref={inputRef}
