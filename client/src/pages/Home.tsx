@@ -772,6 +772,18 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {/* 지도 섹션 */}
+          <div className="mt-8 md:mt-12">
+            <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] overflow-hidden shadow-sm">
+              <div className="bg-[oklch(0.18_0.04_255)] text-white px-4 md:px-6 py-4">
+                <h3 className="text-xl md:text-2xl font-bold">오시는 길</h3>
+              </div>
+              <div className="p-4 md:p-6">
+                <img src="/manus-storage/starfield-suwon-map_2785ec6d.jpg" alt="티켓나라 스타필드수원 위치 지도" className="w-full h-auto rounded-lg border-2 border-[oklch(0.78_0.12_80)]" />
+              </div>
+            </div>
+          </div>
         </div>
 
 
