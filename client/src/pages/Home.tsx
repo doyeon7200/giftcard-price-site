@@ -1,7 +1,7 @@
-/**
+/*
  * 티켓나라 스타필드수원 — 상품권 시세 안내 메인 페이지
  * Design: Deep Navy (#0a1628) + Gold (#c9a227) — 신뢰·안정·가치
- * Layout: 스티키 헤더 → 히어로 배너 → 안내문구 → 통합 시세표 (카테고리 탭 없음) → 푸터
+ * Layout: 스티키 헤더 → 히어로 배너 → 안내문구 → 통합 시세표 (카테고리 탭 없음) → 네이버 지도 → 푸터
  */
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -37,6 +37,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Edit3,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 // ─── 관리자 로그인 다이얼로그 ───────────────────────────────────────────────
@@ -49,95 +51,120 @@ function AdminLoginDialog({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [pw, setPw] = useState("");
-  const [err, setErr] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = () => {
-    if (pw === getAdminPassword()) {
-      setErr(false);
-      setPw("");
+  const handleLogin = () => {
+    const correctPassword = getAdminPassword();
+    if (password === correctPassword) {
+      setPassword("");
+      setError("");
       onSuccess();
     } else {
-      setErr(true);
+      setError("비밀번호가 틀렸습니다.");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) { setPw(""); setErr(false); onClose(); } }}>
-      <DialogContent className="max-w-sm">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-[oklch(0.18_0.04_255)]">
-            <Lock className="w-5 h-5 text-[oklch(0.78_0.12_80)]" />
-            관리자 로그인
-          </DialogTitle>
+          <DialogTitle>관리자 로그인</DialogTitle>
         </DialogHeader>
-        <div className="py-2">
-          <p className="text-sm text-muted-foreground mb-3">비밀번호를 입력하세요.</p>
+        <div className="space-y-4">
           <Input
             type="password"
-            placeholder="비밀번호"
-            value={pw}
-            onChange={(e) => { setPw(e.target.value); setErr(false); }}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            className={err ? "border-red-500" : ""}
-            autoFocus
+            placeholder="비밀번호 입력"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError("");
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleLogin();
+            }}
           />
-          {err && <p className="text-xs text-red-500 mt-1">비밀번호가 올바르지 않습니다.</p>}
+          {error && <p className="text-sm text-red-500">{error}</p>}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>취소</Button>
-          <Button
-            onClick={handleSubmit}
-            className="bg-[oklch(0.18_0.04_255)] text-[oklch(0.97_0.005_255)] hover:bg-[oklch(0.24_0.05_255)]"
-          >
-            확인
+          <Button variant="outline" onClick={onClose}>
+            취소
           </Button>
+          <Button onClick={handleLogin}>로그인</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-// ─── 비밀번호 변경 다이얼로그 ─────────────────────────────────────────────
-function ChangePwDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [cur, setCur] = useState("");
-  const [next, setNext] = useState("");
-  const [confirm, setConfirm] = useState("");
+// ─── 비밀번호 변경 다이얼로그 ───────────────────────────────────────────────
+function ChangePasswordDialog({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSave = () => {
-    if (cur !== getAdminPassword()) { toast.error("현재 비밀번호가 올바르지 않습니다."); return; }
-    if (next.length < 4) { toast.error("새 비밀번호는 4자 이상이어야 합니다."); return; }
-    if (next !== confirm) { toast.error("새 비밀번호가 일치하지 않습니다."); return; }
-    setAdminPassword(next);
+  const handleChange = () => {
+    if (oldPassword !== getAdminPassword()) {
+      setError("기존 비밀번호가 틀렸습니다.");
+      return;
+    }
+    if (newPassword.length < 4) {
+      setError("새 비밀번호는 4자 이상이어야 합니다.");
+      return;
+    }
+    setAdminPassword(newPassword);
     toast.success("비밀번호가 변경되었습니다.");
-    setCur(""); setNext(""); setConfirm("");
+    setOldPassword("");
+    setNewPassword("");
+    setError("");
     onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-sm">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-[oklch(0.78_0.12_80)]" />
-            비밀번호 변경
-          </DialogTitle>
+          <DialogTitle>비밀번호 변경</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3 py-2">
-          <Input type="password" placeholder="현재 비밀번호" value={cur} onChange={(e) => setCur(e.target.value)} />
-          <Input type="password" placeholder="새 비밀번호 (4자 이상)" value={next} onChange={(e) => setNext(e.target.value)} />
-          <Input type="password" placeholder="새 비밀번호 확인" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        <div className="space-y-4">
+          <Input
+            type="password"
+            placeholder="기존 비밀번호"
+            value={oldPassword}
+            onChange={(e) => {
+              setOldPassword(e.target.value);
+              setError("");
+            }}
+          />
+          <Input
+            type="password"
+            placeholder="새 비밀번호"
+            value={newPassword}
+            onChange={(e) => {
+              setNewPassword(e.target.value);
+              setError("");
+            }}
+          />
+          {error && <p className="text-sm text-red-500">{error}</p>}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>취소</Button>
-          <Button onClick={handleSave} className="bg-[oklch(0.18_0.04_255)] text-white hover:bg-[oklch(0.24_0.05_255)]">변경</Button>
+          <Button variant="outline" onClick={onClose}>
+            취소
+          </Button>
+          <Button onClick={handleChange}>변경</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-// ─── 항목 추가 다이얼로그 ─────────────────────────────────────────────────
+// ─── 항목 추가 다이얼로그 ────────────────────────────────────────────────────
 function AddItemDialog({
   open,
   onClose,
@@ -147,50 +174,54 @@ function AddItemDialog({
   onClose: () => void;
   onAdd: (item: Omit<GiftCardItem, "id">) => void;
 }) {
-  const [form, setForm] = useState({
-    name: "",
-    category: "대형마트",
-    sellPrice: 95000,
-    sellDiscount: 5.0,
-    buyPrice: 97000,
-    buyDiscount: 3.0,
-    note: "",
-    available: true,
-  });
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("대형마트");
+  const [sellPrice, setSellPrice] = useState("");
+  const [sellDiscount, setSellDiscount] = useState("");
+  const [buyPrice, setBuyPrice] = useState("");
+  const [buyDiscount, setBuyDiscount] = useState("");
 
   const handleAdd = () => {
-    if (!form.name.trim()) { toast.error("상품권명을 입력하세요."); return; }
+    if (!name) {
+      toast.error("상품권명을 입력하세요.");
+      return;
+    }
     onAdd({
-      name: form.name,
-      category: form.category,
-      sellPrice: form.sellPrice,
-      sellDiscount: form.sellDiscount,
-      buyPrice: form.buyPrice,
-      buyDiscount: form.buyDiscount,
-      note: form.note,
-      available: form.available,
+      name,
+      category,
+      sellPrice: Number(sellPrice) || 0,
+      sellDiscount: Number(sellDiscount) || 0,
+      buyPrice: Number(buyPrice) || 0,
+      buyDiscount: Number(buyDiscount) || 0,
+      note: "",
+      available: true,
     });
-    setForm({ name: "", category: "대형마트", sellPrice: 95000, sellDiscount: 5.0, buyPrice: 97000, buyDiscount: 3.0, note: "", available: true });
+    setName("");
+    setSellPrice("");
+    setSellDiscount("");
+    setBuyPrice("");
+    setBuyDiscount("");
     onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-sm">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Plus className="w-5 h-5 text-[oklch(0.78_0.12_80)]" />
-            항목 추가
-          </DialogTitle>
+          <DialogTitle>항목 추가</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3 py-2">
+        <div className="space-y-4">
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">상품권명</label>
-            <Input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="예: 롯데 500만원이상" />
+            <label className="block text-xs font-semibold mb-1">상품권명</label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">카테고리</label>
-            <select value={form.category} onChange={(e) => setForm(f => ({ ...f, category: e.target.value }))} className="w-full px-2 py-1 border rounded text-sm">
+            <label className="block text-xs font-semibold mb-1">카테고리</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-3 py-2 border border-[oklch(0.88_0.01_255)] rounded-lg text-sm"
+            >
               <option>대형마트</option>
               <option>모바일상품권</option>
               <option>백화점</option>
@@ -202,34 +233,30 @@ function AddItemDialog({
               <option>기프트카드</option>
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">파실때(이체) 가격</label>
-              <Input type="number" value={form.sellPrice} onChange={(e) => setForm(f => ({ ...f, sellPrice: Number(e.target.value) }))} />
+              <label className="block text-xs font-semibold mb-1">파실때 가격</label>
+              <Input type="number" value={sellPrice} onChange={(e) => setSellPrice(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">할인율 (%)</label>
-              <Input type="number" step="0.1" value={form.sellDiscount} onChange={(e) => setForm(f => ({ ...f, sellDiscount: Number(e.target.value) }))} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">사실때(현금) 가격</label>
-              <Input type="number" value={form.buyPrice} onChange={(e) => setForm(f => ({ ...f, buyPrice: Number(e.target.value) }))} />
+              <label className="block text-xs font-semibold mb-1">할인율(%)</label>
+              <Input type="number" step="0.1" value={sellDiscount} onChange={(e) => setSellDiscount(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">할인율 (%)</label>
-              <Input type="number" step="0.1" value={form.buyDiscount} onChange={(e) => setForm(f => ({ ...f, buyDiscount: Number(e.target.value) }))} />
+              <label className="block text-xs font-semibold mb-1">사실때 가격</label>
+              <Input type="number" value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} />
             </div>
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">비고</label>
-            <Input value={form.note} onChange={(e) => setForm(f => ({ ...f, note: e.target.value }))} placeholder="선택사항" />
+            <div>
+              <label className="block text-xs font-semibold mb-1">할인율(%)</label>
+              <Input type="number" step="0.1" value={buyDiscount} onChange={(e) => setBuyDiscount(e.target.value)} />
+            </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>취소</Button>
-          <Button onClick={handleAdd} className="bg-[oklch(0.18_0.04_255)] text-white hover:bg-[oklch(0.24_0.05_255)]">추가</Button>
+          <Button variant="outline" onClick={onClose}>
+            취소
+          </Button>
+          <Button onClick={handleAdd}>추가</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -243,12 +270,20 @@ function PriceRow({
   onChange,
   onDelete,
   isEven,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown,
 }: {
   item: GiftCardItem;
   isAdmin: boolean;
   onChange: (updated: GiftCardItem) => void;
   onDelete: () => void;
   isEven: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 }) {
   const [editing, setEditing] = useState<null | "name" | "sellPrice" | "sellDiscount" | "buyPrice" | "buyDiscount" | "note">(null);
   const [tempVal, setTempVal] = useState("");
@@ -286,14 +321,13 @@ function PriceRow({
 
   const rowBg = isEven ? "bg-white" : "bg-[oklch(0.97_0.005_255)]";
   const unavailableStyle = !item.available ? "opacity-40" : "";
-  // 열별 배경색
   const sellBg = isEven ? "bg-[oklch(0.96_0.01_200)]" : "bg-[oklch(0.93_0.02_200)]";
   const buyBg = isEven ? "bg-[oklch(0.96_0.01_10)]" : "bg-[oklch(0.93_0.02_10)]";
 
   return (
     <tr className={`${rowBg} ${unavailableStyle} transition-colors hover:bg-[oklch(0.93_0.01_255)/50]`}>
-      {/* 상품권명 */}
-      <td className="px-3 py-3 text-sm font-medium text-[oklch(0.18_0.04_255)] text-center">
+      {/* 상품권명 - 모바일에서 더 크게 */}
+      <td className="px-2 md:px-3 py-3 text-sm md:text-base font-medium text-[oklch(0.18_0.04_255)] text-center">
         {isAdmin && editing === "name" ? (
           <input
             ref={inputRef}
@@ -313,12 +347,12 @@ function PriceRow({
         )}
       </td>
       {/* 파실때(이체) 가격 */}
-      <td className={`${sellBg} px-3 py-3 text-sm text-center font-semibold text-[oklch(0.3_0.08_200)]`}>
+      <td className={`${sellBg} px-1.5 md:px-3 py-3 text-xs md:text-sm text-center font-semibold text-[oklch(0.3_0.08_200)]`}>
         {isAdmin && editing === "sellPrice" ? (
           <input
             ref={inputRef}
             type="number"
-            className="editable-cell w-24 text-sm border-0 bg-transparent p-0 text-center"
+            className="editable-cell w-full text-xs md:text-sm border-0 bg-transparent p-0 text-center"
             value={tempVal}
             onChange={(e) => setTempVal(e.target.value)}
             onBlur={commitEdit}
@@ -333,14 +367,14 @@ function PriceRow({
           </span>
         )}
       </td>
-      {/* 파실때 할인율 */}
-      <td className={`${sellBg} px-3 py-3 text-sm text-center`}>
+      {/* 파실때 할인율 - 모바일에서 숨김 */}
+      <td className={`${sellBg} px-1 md:px-3 py-3 text-xs font-bold text-[oklch(0.3_0.08_200)] text-center hidden md:table-cell`}>
         {isAdmin && editing === "sellDiscount" ? (
           <input
             ref={inputRef}
             type="number"
             step="0.1"
-            className="editable-cell w-16 text-sm border-0 bg-transparent p-0 text-center"
+            className="editable-cell w-full text-xs border-0 bg-transparent p-0 text-center"
             value={tempVal}
             onChange={(e) => setTempVal(e.target.value)}
             onBlur={commitEdit}
@@ -356,12 +390,12 @@ function PriceRow({
         )}
       </td>
       {/* 사실때(현금) 가격 */}
-      <td className={`${buyBg} px-3 py-3 text-sm text-center font-semibold text-[oklch(0.3_0.08_10)]`}>
+      <td className={`${buyBg} px-1.5 md:px-3 py-3 text-xs md:text-sm text-center font-semibold text-[oklch(0.3_0.08_10)]`}>
         {isAdmin && editing === "buyPrice" ? (
           <input
             ref={inputRef}
             type="number"
-            className="editable-cell w-24 text-sm border-0 bg-transparent p-0 text-center"
+            className="editable-cell w-full text-xs md:text-sm border-0 bg-transparent p-0 text-center"
             value={tempVal}
             onChange={(e) => setTempVal(e.target.value)}
             onBlur={commitEdit}
@@ -376,14 +410,14 @@ function PriceRow({
           </span>
         )}
       </td>
-      {/* 사실때 할인율 */}
-      <td className={`${buyBg} px-3 py-3 text-sm text-center`}>
+      {/* 사실때 할인율 - 모바일에서 숨김 */}
+      <td className={`${buyBg} px-1 md:px-3 py-3 text-xs font-bold text-[oklch(0.3_0.08_10)] text-center hidden md:table-cell`}>
         {isAdmin && editing === "buyDiscount" ? (
           <input
             ref={inputRef}
             type="number"
             step="0.1"
-            className="editable-cell w-16 text-sm border-0 bg-transparent p-0 text-center"
+            className="editable-cell w-full text-xs border-0 bg-transparent p-0 text-center"
             value={tempVal}
             onChange={(e) => setTempVal(e.target.value)}
             onBlur={commitEdit}
@@ -398,12 +432,12 @@ function PriceRow({
           </span>
         )}
       </td>
-      {/* 비고 */}
-      <td className="px-3 py-3 text-sm text-center text-muted-foreground">
+      {/* 비고 - 모바일에서 숨김 */}
+      <td className="px-1.5 md:px-3 py-3 text-xs md:text-sm text-center text-muted-foreground hidden md:table-cell">
         {isAdmin && editing === "note" ? (
           <input
             ref={inputRef}
-            className="editable-cell w-full text-sm border-0 bg-transparent p-0 text-center"
+            className="editable-cell w-full text-xs border-0 bg-transparent p-0 text-center"
             value={tempVal}
             onChange={(e) => setTempVal(e.target.value)}
             onBlur={commitEdit}
@@ -420,18 +454,38 @@ function PriceRow({
       </td>
       {/* 관리자 액션 */}
       {isAdmin && (
-        <td className="px-3 py-3 text-center">
-          <div className="flex items-center justify-center gap-2">
+        <td className="px-1.5 md:px-3 py-3 text-center">
+          <div className="flex items-center justify-center gap-1">
             <button
               onClick={() => onChange({ ...item, available: !item.available })}
-              className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+              className={`text-xs px-1.5 md:px-2 py-0.5 rounded-full border transition-colors hidden md:inline-block ${
                 item.available
                   ? "border-green-300 text-green-700 hover:bg-green-50"
                   : "border-gray-300 text-gray-500 hover:bg-gray-50"
               }`}
             >
-              {item.available ? "취급중" : "미취급"}
+              {item.available ? "취급" : "미취급"}
             </button>
+            {onMoveUp && (
+              <button
+                onClick={() => onMoveUp()}
+                disabled={!canMoveUp}
+                className="text-[oklch(0.78_0.12_80)] hover:text-[oklch(0.65_0.13_78)] disabled:opacity-30 transition-colors"
+                title="위로 이동"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </button>
+            )}
+            {onMoveDown && (
+              <button
+                onClick={() => onMoveDown()}
+                disabled={!canMoveDown}
+                className="text-[oklch(0.78_0.12_80)] hover:text-[oklch(0.65_0.13_78)] disabled:opacity-30 transition-colors"
+                title="아래로 이동"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
             <button
               onClick={onDelete}
               className="text-red-400 hover:text-red-600 transition-colors"
@@ -472,6 +526,21 @@ export default function Home() {
     setHasChanges(true);
   };
 
+  const moveItem = (itemId: string, direction: 'up' | 'down') => {
+    setData((prev) => {
+      const idx = prev.findIndex((it) => it.id === itemId);
+      if (idx === -1) return prev;
+      if (direction === 'up' && idx === 0) return prev;
+      if (direction === 'down' && idx === prev.length - 1) return prev;
+      
+      const newData = [...prev];
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      [newData[idx], newData[swapIdx]] = [newData[swapIdx], newData[idx]];
+      return newData;
+    });
+    setHasChanges(true);
+  };
+
   const addItem = (item: Omit<GiftCardItem, "id">) => {
     const id = `item_${Date.now()}`;
     setData((prev) => [...prev, { ...item, id }]);
@@ -479,33 +548,27 @@ export default function Home() {
     toast.success("항목이 추가되었습니다.");
   };
 
+  const handleLogout = () => {
+    setIsAdmin(false);
+    toast.success("로그아웃되었습니다.");
+  };
+
   const handleSave = () => {
     saveData(data);
     setHasChanges(false);
     setLastSaved(new Date());
-    toast.success("저장되었습니다.", { icon: <CheckCircle2 className="w-4 h-4 text-green-500" /> });
+    toast.success("저장되었습니다.");
   };
 
   const handleReset = () => {
-    if (!confirm("모든 시세를 초기값으로 되돌리겠습니까?")) return;
-    const d = resetToDefault();
-    setData(d);
-    setHasChanges(false);
-    toast.info("초기값으로 복원되었습니다.");
-  };
-
-  const handleLogout = () => {
-    setIsAdmin(false);
-    if (hasChanges) {
-      saveData(data);
-      toast.success("변경사항이 자동 저장되었습니다.");
+    if (confirm("정말 초기화하시겠습니까? 모든 변경사항이 삭제됩니다.")) {
+      const defaultData = resetToDefault();
+      setData(defaultData);
+      setHasChanges(false);
+      toast.success("초기화되었습니다.");
     }
   };
 
-  const now = new Date();
-  const timeStr = now.toLocaleString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-
-  // 카테고리별로 그룹화 (표시용)
   const groupedByCategory: Record<string, GiftCardItem[]> = {};
   data.forEach((item) => {
     if (!groupedByCategory[item.category]) {
@@ -514,312 +577,267 @@ export default function Home() {
     groupedByCategory[item.category].push(item);
   });
 
-  const categoryOrder = ["대형마트", "모바일상품권", "백화점", "전자제품", "할인점", "주유소", "음식점", "문화", "기프트카드"];
+  const categoryOrder = [
+    "대형마트", "모바일상품권", "백화점", "전자제품", "할인점",
+    "주유소", "음식점", "문화", "기프트카드"
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[oklch(0.97_0.005_255)]">
-      {/* ── 상단 헤더 ── */}
-      <header className="sticky top-0 z-50 bg-[oklch(0.18_0.04_255)] shadow-lg">
-        <div className="container">
-          <div className="flex items-center justify-between h-14 md:h-16">
-            {/* 로고 */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[oklch(0.78_0.12_80)] flex items-center justify-center shadow-md">
-                <span className="text-[oklch(0.18_0.04_255)] font-black text-base md:text-lg leading-none">티</span>
-              </div>
-              <div>
-                <h1 className="text-white font-black text-base md:text-lg leading-tight tracking-tight">
-                  티켓나라 스타필드수원
-                </h1>
-                <p className="text-[oklch(0.78_0.12_80)] text-[10px] md:text-xs font-medium leading-none mt-0.5">
-                  상품권 매입·판매 시세 안내
-                </p>
-              </div>
-            </div>
-
-            {/* 우측 액션 */}
-            <div className="flex items-center gap-2 md:gap-3">
-              {isAdmin ? (
-                <>
-                  {hasChanges && (
-                    <button
-                      onClick={handleSave}
-                      className="flex items-center gap-1.5 bg-[oklch(0.78_0.12_80)] text-[oklch(0.15_0.04_255)] text-xs md:text-sm font-bold px-3 py-1.5 rounded-lg hover:bg-[oklch(0.85_0.12_80)] transition-colors shadow"
-                    >
-                      <Save className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">저장</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setChangePwOpen(true)}
-                    className="text-white/60 hover:text-white transition-colors"
-                    title="비밀번호 변경"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-1.5 text-white/70 hover:text-white text-xs md:text-sm transition-colors"
-                  >
-                    <Unlock className="w-4 h-4" />
-                    <span className="hidden sm:inline">관리자 종료</span>
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setLoginOpen(true)}
-                  className="flex items-center gap-1.5 text-white/50 hover:text-white/80 text-xs transition-colors"
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline text-xs">관리자</span>
-                </button>
-              )}
-            </div>
+    <div className="min-h-screen flex flex-col bg-[oklch(0.98_0.001_286)]">
+      {/* 스티키 헤더 */}
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-[oklch(0.18_0.04_255)] to-[oklch(0.25_0.04_255)] text-white shadow-md">
+        <div className="container flex items-center justify-between py-3 md:py-4">
+          <h1 className="text-lg md:text-xl font-bold">티켓나라 스타필드수원</h1>
+          <div className="flex items-center gap-2 md:gap-3">
+            {isAdmin && (
+              <>
+                <span className="text-xs text-white/70 hidden sm:inline">
+                  {hasChanges ? "변경됨" : lastSaved ? `저장됨 ${lastSaved.toLocaleTimeString("ko-KR")}` : ""}
+                </span>
+                <Button size="sm" onClick={handleSave} disabled={!hasChanges} className="bg-white/20 hover:bg-white/30 text-white text-xs md:text-sm">
+                  <Save className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                  <span className="hidden sm:inline">저장</span>
+                </Button>
+              </>
+            )}
+            <button
+              onClick={() => (isAdmin ? handleLogout() : setLoginOpen(true))}
+              className="text-white/80 hover:text-white transition-colors"
+              title={isAdmin ? "로그아웃" : "관리자 로그인"}
+            >
+              {isAdmin ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* ── 공지 배너 ── */}
-      <div className="bg-[oklch(0.78_0.12_80)] text-[oklch(0.15_0.04_255)]">
-        <div className="container">
-          <div className="flex items-center gap-2 py-2 text-xs md:text-sm font-medium overflow-hidden">
-            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="whitespace-nowrap">시세는 수시로 변동될 수 있습니다.</span>
-            <span className="mx-2 text-[oklch(0.15_0.04_255)/50]">|</span>
-            <span className="whitespace-nowrap">최종 업데이트: {timeStr}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── 히어로 섹션 ── */}
-      <section className="bg-[oklch(0.18_0.04_255)] text-white py-8 md:py-12">
-        <div className="container">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <h2 className="text-2xl md:text-4xl font-black leading-tight mb-2">
-                상품권 매입·판매
-                <br />
-                <span className="text-[oklch(0.78_0.12_80)]">최신 시세 안내</span>
-              </h2>
-              <p className="text-white/70 text-sm md:text-base max-w-md">
-                티켓나라 스타필드수원에서 투명하고 정직한 시세로 상품권을 매입·판매합니다.
-                방문 전 시세를 확인하세요.
-              </p>
-            </div>
-            {/* 연락처 카드 */}
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-              <div className="flex items-center gap-3 bg-[oklch(0.24_0.05_255)] rounded-xl px-4 py-3 min-w-[180px]">
-                <div className="w-9 h-9 rounded-lg bg-[oklch(0.78_0.12_80)/20] flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-4 h-4 text-[oklch(0.78_0.12_80)]" />
-                </div>
+      <main className="flex-1">
+        {/* 히어로 배너 */}
+        <section className="bg-gradient-to-r from-[oklch(0.18_0.04_255)] to-[oklch(0.25_0.04_255)] text-white py-8 md:py-12">
+          <div className="container">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">상품권 매입·판매</h2>
+            <p className="text-lg md:text-xl text-white/80 mb-6 md:mb-8">최신 시세 안내</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
+                <Phone className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
                 <div>
-                  <p className="text-white/50 text-[10px] font-medium uppercase tracking-wide">전화문의</p>
-                  <p className="text-white font-bold text-base leading-tight">010-9650-5566</p>
+                  <p className="text-xs md:text-sm text-white/70">전화문의</p>
+                  <p className="text-base md:text-lg font-semibold">010-9650-5566</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-[oklch(0.24_0.05_255)] rounded-xl px-4 py-3 min-w-[180px]">
-                <div className="w-9 h-9 rounded-lg bg-[oklch(0.78_0.12_80)/20] flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-4 h-4 text-[oklch(0.78_0.12_80)]" />
-                </div>
+              <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
+                <Clock className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
                 <div>
-                  <p className="text-white/50 text-[10px] font-medium uppercase tracking-wide">영업시간</p>
-                  <p className="text-white font-bold text-sm leading-tight">10:00 ~ 19:00</p>
+                  <p className="text-xs md:text-sm text-white/70">영업시간</p>
+                  <p className="text-base md:text-lg font-semibold">10:00 ~ 19:00</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-[oklch(0.24_0.05_255)] rounded-xl px-4 py-3 min-w-[200px]">
-                <div className="w-9 h-9 rounded-lg bg-[oklch(0.78_0.12_80)/20] flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-4 h-4 text-[oklch(0.78_0.12_80)]" />
-                </div>
+              <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
+                <MapPin className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
                 <div>
-                  <p className="text-white/50 text-[10px] font-medium uppercase tracking-wide">위치</p>
-                  <p className="text-white font-bold text-xs leading-tight">수원시 장안구 수성로 157번길60</p>
+                  <p className="text-xs md:text-sm text-white/70">위치</p>
+                  <p className="text-sm md:text-base font-semibold">수원시 장안구 수성로 157번길60</p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── 골드 구분선 ── */}
-      <div className="gold-divider" />
+        {/* 골드 구분선 */}
+        <div className="h-1 bg-[oklch(0.78_0.12_80)]" />
 
-      {/* ── 메인 콘텐츠 ── */}
-      <main className="flex-1 py-6 md:py-10">
-        <div className="container">
-          {/* 관리자 편집 안내 */}
-          {isAdmin && (
-            <div className="mb-4 flex items-center gap-2 bg-[oklch(0.78_0.12_80)/15] border border-[oklch(0.78_0.12_80)/30] rounded-xl px-4 py-3">
-              <Edit3 className="w-4 h-4 text-[oklch(0.65_0.13_78)]" />
-              <p className="text-sm text-[oklch(0.4_0.1_78)] font-medium">
-                <strong>관리자 편집 모드</strong> — 셀을 클릭하여 직접 수정하세요. 수정 후 저장 버튼을 눌러주세요.
-              </p>
-              {lastSaved && (
-                <span className="ml-auto text-xs text-[oklch(0.5_0.08_78)]">
-                  마지막 저장: {lastSaved.toLocaleTimeString("ko-KR")}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* 안내문구 */}
-          <div className="mb-6 bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] p-4 md:p-6 shadow-sm">
-            <h3 className="font-black text-[oklch(0.18_0.04_255)] mb-3 text-lg">거래 안내사항</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <span className="text-[oklch(0.78_0.12_80)] font-bold flex-shrink-0">-</span>
-                <span>구매시 방문 현금결제만 가능합니다. (수표X, 카드X)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[oklch(0.78_0.12_80)] font-bold flex-shrink-0">-</span>
-                <span>상품권 거래시 시세표와 같이 거래합니다. (도착당시 시세 적용)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[oklch(0.78_0.12_80)] font-bold flex-shrink-0">-</span>
-                <span>상품권 판매시 현금지급 가능 시세변동 (문의바람)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[oklch(0.78_0.12_80)] font-bold flex-shrink-0">-</span>
-                <span>상품권 상태(훼손, 구권)에 따라 거래불가 / 가격변동 될 수 있습니다.</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* 통합 시세표 */}
-          <div className="bg-white rounded-2xl shadow-sm border border-[oklch(0.88_0.01_255)] overflow-hidden">
-            {/* 섹션 헤더 */}
-            <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-[oklch(0.88_0.01_255)]">
-              <div>
-                <h3 className="font-black text-[oklch(0.18_0.04_255)] text-lg leading-tight">
-                  상품권 시세표
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {data.filter(i => i.available).length}개 취급 중 / 총 {data.length}개 항목
+        {/* 메인 콘텐츠 */}
+        <div className="flex-1 py-6 md:py-10">
+          <div className="container">
+            {/* 관리자 편집 안내 */}
+            {isAdmin && (
+              <div className="mb-4 flex items-center gap-2 bg-[oklch(0.78_0.12_80)/15] border border-[oklch(0.78_0.12_80)/30] rounded-xl px-4 py-3">
+                <Edit3 className="w-4 h-4 text-[oklch(0.65_0.13_78)] flex-shrink-0" />
+                <p className="text-xs md:text-sm text-[oklch(0.4_0.1_78)] font-medium">
+                  <strong>관리자 편집 모드</strong> — 셀을 클릭하여 직접 수정하세요. 수정 후 저장 버튼을 눌러주세요.
                 </p>
+                {lastSaved && (
+                  <span className="ml-auto text-xs text-[oklch(0.5_0.08_78)] hidden sm:inline">
+                    마지막 저장: {lastSaved.toLocaleTimeString("ko-KR")}
+                  </span>
+                )}
               </div>
+            )}
+
+            {/* 안내문구 - 중앙정렬 */}
+            <div className="mb-6 bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] p-4 md:p-6 shadow-sm">
+              <h3 className="font-black text-[oklch(0.18_0.04_255)] mb-3 text-lg text-center">거래 안내사항</h3>
+              <ul className="space-y-2 text-sm md:text-base text-muted-foreground text-center">
+                <li>구매시 방문 현금결제만 가능합니다. (수표X, 카드X)</li>
+                <li>상품권 거래시 시세표와 같이 거래합니다. (도착당시 시세 적용)</li>
+                <li>상품권 판매시 현금지급 가능 시세변동 (문의바람)</li>
+                <li>상품권 상태(훼손, 구권)에 따라 거래불가 / 가격인하 될 수 있습니다.</li>
+              </ul>
+            </div>
+
+            {/* 시세표 */}
+            <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] overflow-hidden shadow-sm">
+              <div className="bg-[oklch(0.18_0.04_255)] text-white px-4 md:px-6 py-4">
+                <h3 className="text-xl md:text-2xl font-bold">상품권 시세표</h3>
+                <p className="text-xs md:text-sm text-white/60 mt-2">77개 카테고리 / 총 78개 항목</p>
+              </div>
+
+              {/* 관리 버튼 */}
               {isAdmin && (
-                <div className="flex items-center gap-2">
+                <div className="px-4 md:px-6 py-3 border-b border-[oklch(0.88_0.01_255)] flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setChangePwOpen(true)}
+                    className="flex items-center gap-1.5 text-xs md:text-sm font-semibold text-[oklch(0.18_0.04_255)] border border-[oklch(0.88_0.01_255)] px-2 md:px-3 py-1.5 rounded-lg hover:bg-[oklch(0.93_0.01_255)] transition-colors"
+                  >
+                    <Settings className="w-3 h-3 md:w-4 md:h-4" />
+                    <span className="hidden sm:inline">비밀번호 변경</span>
+                  </button>
                   <button
                     onClick={() => setAddItemOpen(true)}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-[oklch(0.18_0.04_255)] border border-[oklch(0.88_0.01_255)] px-3 py-1.5 rounded-lg hover:bg-[oklch(0.93_0.01_255)] transition-colors"
+                    className="flex items-center gap-1.5 text-xs md:text-sm font-semibold text-[oklch(0.18_0.04_255)] border border-[oklch(0.88_0.01_255)] px-2 md:px-3 py-1.5 rounded-lg hover:bg-[oklch(0.93_0.01_255)] transition-colors"
                   >
-                    <Plus className="w-4 h-4" />
-                    항목 추가
+                    <Plus className="w-3 h-3 md:w-4 md:h-4" />
+                    <span className="hidden sm:inline">항목 추가</span>
                   </button>
                   <button
                     onClick={handleReset}
-                    className="flex items-center gap-1.5 text-sm text-muted-foreground border border-[oklch(0.88_0.01_255)] px-3 py-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                    className="flex items-center gap-1.5 text-xs md:text-sm text-muted-foreground border border-[oklch(0.88_0.01_255)] px-2 md:px-3 py-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
+                    <RotateCcw className="w-3 h-3 md:w-3.5 md:h-3.5" />
                     <span className="hidden sm:inline">초기화</span>
                   </button>
                 </div>
               )}
-            </div>
 
-            {/* 테이블 */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-[oklch(0.18_0.04_255)]">
-                    <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">상품권명</th>
-                    <th className="bg-[oklch(0.93_0.02_200)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider">파실때(이체)</th>
-                    <th className="bg-[oklch(0.93_0.02_200)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider">할인율</th>
-                    <th className="bg-[oklch(0.93_0.02_10)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider">사실때(현금)</th>
-                    <th className="bg-[oklch(0.93_0.02_10)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider">할인율</th>
-                    <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">비고</th>
-                    {isAdmin && <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">관리</th>}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[oklch(0.92_0.005_255)]">
-                  {categoryOrder.map((cat) => {
-                    const items = groupedByCategory[cat] || [];
-                    if (items.length === 0) return null;
-                    return (
-                      <React.Fragment key={`cat-${cat}`}>
-                        {/* 카테고리 구분 행 */}
-                        <tr className="bg-[oklch(0.93_0.01_255)]">
-                          <td colSpan={isAdmin ? 7 : 6} className="px-3 py-2 text-xs font-bold text-[oklch(0.18_0.04_255)] uppercase tracking-wider">
-                            {cat}
-                          </td>
-                        </tr>
-                        {/* 항목 행 */}
-                        {items.map((item, idx) => (
-                          <PriceRow
-                            key={item.id}
-                            item={item}
-                            isAdmin={isAdmin}
-                            isEven={idx % 2 === 0}
-                            onChange={(updated) => updateItem(item.id, updated)}
-                            onDelete={() => deleteItem(item.id)}
-                          />
-                        ))}
-                      </React.Fragment>
-                    );
-                  })}
-                  {data.length === 0 && (
-                    <tr>
-                      <td colSpan={isAdmin ? 7 : 6} className="text-center py-12 text-muted-foreground text-sm">
-                        등록된 항목이 없습니다.
-                      </td>
+              {/* 테이블 */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-[oklch(0.18_0.04_255)]">
+                      <th className="px-2 md:px-3 py-3 text-center text-xs md:text-sm font-bold text-white/80 uppercase tracking-wider">상품권명</th>
+                      <th className="bg-[oklch(0.93_0.02_200)] px-1.5 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider">파실때</th>
+                      <th className="bg-[oklch(0.93_0.02_200)] px-1 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider hidden md:table-cell">할인율</th>
+                      <th className="bg-[oklch(0.93_0.02_10)] px-1.5 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider">사실때</th>
+                      <th className="bg-[oklch(0.93_0.02_10)] px-1 md:px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider hidden md:table-cell">할인율</th>
+                      <th className="px-1.5 md:px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider hidden md:table-cell">비고</th>
+                      {isAdmin && <th className="px-1.5 md:px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">관리</th>}
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-[oklch(0.92_0.005_255)]">
+                    {categoryOrder.map((cat) => {
+                      const items = groupedByCategory[cat] || [];
+                      if (items.length === 0) return null;
+                      return (
+                        <React.Fragment key={`cat-${cat}`}>
+                          {/* 카테고리 구분 행 */}
+                          <tr className="bg-[oklch(0.93_0.01_255)]">
+                            <td colSpan={isAdmin ? 7 : 6} className="px-3 md:px-6 py-2 text-xs font-bold text-[oklch(0.18_0.04_255)] uppercase tracking-wider">
+                              {cat}
+                            </td>
+                          </tr>
+                          {/* 항목 행 */}
+                          {items.map((item, idx) => {
+                            const itemIndex = data.findIndex(it => it.id === item.id);
+                            return (
+                            <PriceRow
+                              key={item.id}
+                              item={item}
+                              isAdmin={isAdmin}
+                              isEven={idx % 2 === 0}
+                              onChange={(updated) => updateItem(item.id, updated)}
+                              onDelete={() => deleteItem(item.id)}
+                              onMoveUp={() => moveItem(item.id, 'up')}
+                              onMoveDown={() => moveItem(item.id, 'down')}
+                              canMoveUp={itemIndex > 0}
+                              canMoveDown={itemIndex < data.length - 1}
+                            />
+                          );
+                          })}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* 네이버 지도 섹션 */}
+        <section className="py-8 md:py-12 bg-[oklch(0.97_0.005_255)] border-t border-[oklch(0.88_0.01_255)]">
+          <div className="container">
+            <h3 className="text-2xl md:text-3xl font-bold text-[oklch(0.18_0.04_255)] mb-6 text-center">매장 위치</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              {/* 네이버 지도 박스 */}
+              <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] overflow-hidden shadow-sm h-[300px] md:h-[400px]">
+                <iframe
+                  src="https://map.naver.com/search/%EC%88%98%EC%9B%90%EC%8B%9C%20%EC%9E%A5%EC%95%88%EA%B5%AC%20%EC%88%98%EC%84%B1%EB%A1%9C%20157%EB%B2%88%EA%B8%B8/map"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  scrolling="no"
+                  marginHeight={0}
+                  marginWidth={0}
+                  title="티켓나라 스타필드수원 위치"
+                  style={{ border: 'none' }}
+                />
+              </div>
+              {/* 정보 박스 */}
+              <div className="flex flex-col justify-center">
+                <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] p-6 md:p-8 shadow-sm">
+                  <h4 className="text-xl md:text-2xl font-bold text-[oklch(0.18_0.04_255)] mb-4">티켓나라 스타필드수원</h4>
+                  <div className="space-y-4 text-sm md:text-base text-muted-foreground">
+                    <div className="flex gap-3">
+                      <MapPin className="w-5 h-5 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-[oklch(0.18_0.04_255)]">주소</p>
+                        <p>수원시 장안구 수성로 157번길60</p>
+                        <p className="text-xs text-[oklch(0.5_0.02_255)]">[화서역푸르지오 브리시엘상가 133호]</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <Phone className="w-5 h-5 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-[oklch(0.18_0.04_255)]">전화</p>
+                        <p>010-9650-5566</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <Clock className="w-5 h-5 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-[oklch(0.18_0.04_255)]">영업시간</p>
+                        <p>10:00 ~ 19:00</p>
+                        <p className="text-xs text-[oklch(0.5_0.02_255)]">[상가주차장 1시간 무료]</p>
+                      </div>
+                    </div>
+                  </div>
+                  <a
+                    href="https://map.naver.com/search/%EC%88%98%EC%9B%90%EC%8B%9C%20%EC%9E%A5%EC%95%88%EA%B5%AC%20%EC%88%98%EC%84%B1%EB%A1%9C%20157%EB%B2%88%EA%B8%B8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[oklch(0.78_0.12_80)] text-white font-semibold rounded-lg hover:bg-[oklch(0.65_0.13_78)] transition-colors text-sm md:text-base"
+                  >
+                    <MapPin className="w-5 h-5" />
+                    네이버 지도에서 확인
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* ── 골드 구분선 ── */}
-      <div className="gold-divider" />
-
-      {/* ── 푸터 ── */}
-      <footer className="bg-[oklch(0.18_0.04_255)] text-white/60 py-8">
-        <div className="container">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 rounded-md bg-[oklch(0.78_0.12_80)] flex items-center justify-center">
-                  <span className="text-[oklch(0.18_0.04_255)] font-black text-sm">티</span>
-                </div>
-                <span className="text-white font-bold text-base">티켓나라 스타필드수원</span>
-              </div>
-              <p className="text-xs">수원시 장안구 수성로 157번길60 [화서역푸르지오 브리시엘상가 133호]</p>
-              <p className="text-xs mt-1">Tel: 010-9650-5566 | 평일 10:00 ~ 19:00</p>
-            </div>
-            <div className="text-xs">
-              <p>© 2024 티켓나라 스타필드수원. All rights reserved.</p>
-              <p className="mt-1 text-white/40">시세는 시장 상황에 따라 변동될 수 있습니다.</p>
-            </div>
-          </div>
-        </div>
-      </footer>
-
-      {/* ── 다이얼로그 ── */}
+      {/* 다이얼로그들 */}
       <AdminLoginDialog
         open={loginOpen}
         onClose={() => setLoginOpen(false)}
-        onSuccess={() => { setIsAdmin(true); setLoginOpen(false); toast.success("관리자 모드가 활성화되었습니다."); }}
+        onSuccess={() => {
+          setIsAdmin(true);
+          setLoginOpen(false);
+        }}
       />
-      <ChangePwDialog open={changePwOpen} onClose={() => setChangePwOpen(false)} />
-      <AddItemDialog
-        open={addItemOpen}
-        onClose={() => setAddItemOpen(false)}
-        onAdd={addItem}
-      />
-
-      {/* ── 플로팅 저장 버튼 (모바일 관리자) ── */}
-      {isAdmin && hasChanges && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <button
-            onClick={handleSave}
-            className="flex items-center gap-2 bg-[oklch(0.78_0.12_80)] text-[oklch(0.15_0.04_255)] font-bold px-4 py-3 rounded-2xl shadow-xl hover:bg-[oklch(0.85_0.12_80)] transition-all active:scale-95"
-          >
-            <Save className="w-5 h-5" />
-            저장하기
-          </button>
-        </div>
-      )}
+      <ChangePasswordDialog open={changePwOpen} onClose={() => setChangePwOpen(false)} />
+      <AddItemDialog open={addItemOpen} onClose={() => setAddItemOpen(false)} onAdd={addItem} />
     </div>
   );
 }
