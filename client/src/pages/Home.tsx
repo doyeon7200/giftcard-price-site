@@ -615,9 +615,9 @@ export default function Home() {
         {/* 히어로 배너 */}
         <section className="bg-gradient-to-r from-[oklch(0.18_0.04_255)] to-[oklch(0.25_0.04_255)] text-white py-8 md:py-12">
           <div className="container">
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">상품권 매입·판매</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-2 text-[oklch(0.85_0.15_80)]">상품권 매입·판매</h2>
             <p className="text-lg md:text-xl text-white/80 mb-6 md:mb-8">최신 시세 안내</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
               <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
                 <Phone className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
                 <div>
@@ -639,6 +639,17 @@ export default function Home() {
                   <p className="text-sm md:text-base font-semibold">수원시 장안구 수성로 157번길60</p>
                 </div>
               </div>
+              <a href="https://pf.kakao.com/_xnxnxnxn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-lg p-4 transition-colors">
+                <div className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 5.58 2 10c0 2.54 1.19 4.85 3.15 6.37V22l4.1-2.3c.85.2 1.75.3 2.75.3 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs md:text-sm text-white/70">카카오톡 상담</p>
+                  <p className="text-base md:text-lg font-semibold">채널 추가</p>
+                </div>
+              </a>
             </div>
           </div>
         </section>
@@ -678,7 +689,7 @@ export default function Home() {
             {/* 시세표 */}
             <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] overflow-hidden shadow-sm">
               <div className="bg-[oklch(0.18_0.04_255)] text-white px-4 md:px-6 py-4">
-                <h3 className="text-xl md:text-2xl font-bold">상품권 시세표</h3>
+                <h3 className="text-xl md:text-2xl font-bold"></h3>
                 <p className="text-xs md:text-sm text-white/60 mt-2">77개 카테고리 / 총 78개 항목</p>
               </div>
 
