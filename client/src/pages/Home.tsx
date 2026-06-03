@@ -732,9 +732,9 @@ export default function Home() {
                     const items = groupedByCategory[cat] || [];
                     if (items.length === 0) return null;
                     return (
-                      <tbody key={cat}>
+                      <>
                         {/* 카테고리 구분 행 */}
-                        <tr className="bg-[oklch(0.93_0.01_255)]">
+                        <tr key={`cat-${cat}`} className="bg-[oklch(0.93_0.01_255)]">
                           <td colSpan={isAdmin ? 7 : 6} className="px-3 py-2 text-xs font-bold text-[oklch(0.18_0.04_255)] uppercase tracking-wider">
                             {cat}
                           </td>
@@ -750,7 +750,7 @@ export default function Home() {
                             onDelete={() => deleteItem(item.id)}
                           />
                         ))}
-                      </tbody>
+                      </>
                     );
                   })}
                   {data.length === 0 && (
