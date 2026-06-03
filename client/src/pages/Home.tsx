@@ -1,7 +1,7 @@
 /**
- * 원천상품권 — 상품권 시세 안내 메인 페이지
+ * 티켓나라 스타필드수원 — 상품권 시세 안내 메인 페이지
  * Design: Deep Navy (#0a1628) + Gold (#c9a227) — 신뢰·안정·가치
- * Layout: 스티키 헤더 → 히어로 배너 → 공지 → 탭 카테고리 → 가격표 → 안내사항 → 푸터
+ * Layout: 스티키 헤더 → 히어로 배너 → 안내문구 → 통합 시세표 (카테고리 탭 없음) → 푸터
  */
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -11,8 +11,7 @@ import {
   getAdminPassword,
   setAdminPassword,
   resetToDefault,
-  calcPriceFromRate,
-  type GiftCardCategory,
+  formatPrice,
   type GiftCardItem,
 } from "@/lib/giftcardData";
 import {
@@ -24,7 +23,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Phone,
   Clock,
@@ -36,7 +34,6 @@ import {
   Plus,
   Trash2,
   Settings,
-  ChevronRight,
   AlertCircle,
   CheckCircle2,
   Edit3,
@@ -145,35 +142,35 @@ function AddItemDialog({
   open,
   onClose,
   onAdd,
-  categoryName,
 }: {
   open: boolean;
   onClose: () => void;
   onAdd: (item: Omit<GiftCardItem, "id">) => void;
-  categoryName: string;
 }) {
   const [form, setForm] = useState({
-    name: categoryName,
-    faceValue: "",
-    buyRate: 90,
-    sellRate: 95,
+    name: "",
+    category: "대형마트",
+    sellPrice: 95000,
+    sellDiscount: 5.0,
+    buyPrice: 97000,
+    buyDiscount: 3.0,
     note: "",
     available: true,
   });
 
   const handleAdd = () => {
-    if (!form.faceValue.trim()) { toast.error("권면가를 입력하세요."); return; }
+    if (!form.name.trim()) { toast.error("상품권명을 입력하세요."); return; }
     onAdd({
       name: form.name,
-      faceValue: form.faceValue,
-      buyRate: form.buyRate,
-      buyPrice: calcPriceFromRate(form.faceValue, form.buyRate),
-      sellRate: form.sellRate,
-      sellPrice: calcPriceFromRate(form.faceValue, form.sellRate),
+      category: form.category,
+      sellPrice: form.sellPrice,
+      sellDiscount: form.sellDiscount,
+      buyPrice: form.buyPrice,
+      buyDiscount: form.buyDiscount,
       note: form.note,
       available: form.available,
     });
-    setForm({ name: categoryName, faceValue: "", buyRate: 90, sellRate: 95, note: "", available: true });
+    setForm({ name: "", category: "대형마트", sellPrice: 95000, sellDiscount: 5.0, buyPrice: 97000, buyDiscount: 3.0, note: "", available: true });
     onClose();
   };
 
@@ -188,21 +185,41 @@ function AddItemDialog({
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">상품권 이름</label>
-            <Input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="예: 문화상품권" />
+            <label className="text-xs text-muted-foreground mb-1 block">상품권명</label>
+            <Input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="예: 롯데 500만원이상" />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">권면가 (예: 5만원, 10만원)</label>
-            <Input value={form.faceValue} onChange={(e) => setForm(f => ({ ...f, faceValue: e.target.value }))} placeholder="예: 5만원" />
+            <label className="text-xs text-muted-foreground mb-1 block">카테고리</label>
+            <select value={form.category} onChange={(e) => setForm(f => ({ ...f, category: e.target.value }))} className="w-full px-2 py-1 border rounded text-sm">
+              <option>대형마트</option>
+              <option>모바일상품권</option>
+              <option>백화점</option>
+              <option>전자제품</option>
+              <option>할인점</option>
+              <option>주유소</option>
+              <option>음식점</option>
+              <option>문화</option>
+              <option>기프트카드</option>
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">매입률 (%)</label>
-              <Input type="number" min={1} max={100} value={form.buyRate} onChange={(e) => setForm(f => ({ ...f, buyRate: Number(e.target.value) }))} />
+              <label className="text-xs text-muted-foreground mb-1 block">파실때(이체) 가격</label>
+              <Input type="number" value={form.sellPrice} onChange={(e) => setForm(f => ({ ...f, sellPrice: Number(e.target.value) }))} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">판매률 (%)</label>
-              <Input type="number" min={1} max={100} value={form.sellRate} onChange={(e) => setForm(f => ({ ...f, sellRate: Number(e.target.value) }))} />
+              <label className="text-xs text-muted-foreground mb-1 block">할인율 (%)</label>
+              <Input type="number" step="0.1" value={form.sellDiscount} onChange={(e) => setForm(f => ({ ...f, sellDiscount: Number(e.target.value) }))} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">사실때(현금) 가격</label>
+              <Input type="number" value={form.buyPrice} onChange={(e) => setForm(f => ({ ...f, buyPrice: Number(e.target.value) }))} />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">할인율 (%)</label>
+              <Input type="number" step="0.1" value={form.buyDiscount} onChange={(e) => setForm(f => ({ ...f, buyDiscount: Number(e.target.value) }))} />
             </div>
           </div>
           <div>
@@ -219,7 +236,7 @@ function AddItemDialog({
   );
 }
 
-// ─── 가격표 행 (편집 가능) ────────────────────────────────────────────────
+// ─── 시세표 행 (편집 가능) ────────────────────────────────────────────────
 function PriceRow({
   item,
   isAdmin,
@@ -233,7 +250,7 @@ function PriceRow({
   onDelete: () => void;
   isEven: boolean;
 }) {
-  const [editing, setEditing] = useState<null | "buyRate" | "sellRate" | "note" | "name" | "faceValue">(null);
+  const [editing, setEditing] = useState<null | "name" | "sellPrice" | "sellDiscount" | "buyPrice" | "buyDiscount" | "note">(null);
   const [tempVal, setTempVal] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -250,22 +267,18 @@ function PriceRow({
   const commitEdit = () => {
     if (!editing) return;
     const updated = { ...item };
-    if (editing === "buyRate") {
-      const rate = Math.min(100, Math.max(1, Number(tempVal) || item.buyRate));
-      updated.buyRate = rate;
-      updated.buyPrice = calcPriceFromRate(item.faceValue, rate);
-    } else if (editing === "sellRate") {
-      const rate = Math.min(100, Math.max(1, Number(tempVal) || item.sellRate));
-      updated.sellRate = rate;
-      updated.sellPrice = calcPriceFromRate(item.faceValue, rate);
+    if (editing === "name") {
+      updated.name = tempVal;
+    } else if (editing === "sellPrice") {
+      updated.sellPrice = Number(tempVal) || item.sellPrice;
+    } else if (editing === "sellDiscount") {
+      updated.sellDiscount = Number(tempVal) || item.sellDiscount;
+    } else if (editing === "buyPrice") {
+      updated.buyPrice = Number(tempVal) || item.buyPrice;
+    } else if (editing === "buyDiscount") {
+      updated.buyDiscount = Number(tempVal) || item.buyDiscount;
     } else if (editing === "note") {
       updated.note = tempVal;
-    } else if (editing === "name") {
-      updated.name = tempVal;
-    } else if (editing === "faceValue") {
-      updated.faceValue = tempVal;
-      updated.buyPrice = calcPriceFromRate(tempVal, item.buyRate);
-      updated.sellPrice = calcPriceFromRate(tempVal, item.sellRate);
     }
     onChange(updated);
     setEditing(null);
@@ -276,7 +289,7 @@ function PriceRow({
 
   return (
     <tr className={`${rowBg} ${unavailableStyle} transition-colors hover:bg-[oklch(0.93_0.01_255)/50]`}>
-      {/* 상품권 이름 */}
+      {/* 상품권명 */}
       <td className="px-3 py-3 text-sm font-medium text-[oklch(0.18_0.04_255)]">
         {isAdmin && editing === "name" ? (
           <input
@@ -296,12 +309,13 @@ function PriceRow({
           </span>
         )}
       </td>
-      {/* 권면가 */}
-      <td className="px-3 py-3 text-sm text-center font-semibold text-[oklch(0.18_0.04_255)]">
-        {isAdmin && editing === "faceValue" ? (
+      {/* 파실때(이체) 가격 */}
+      <td className="px-3 py-3 text-sm text-center font-semibold text-[oklch(0.35_0.1_145)]">
+        {isAdmin && editing === "sellPrice" ? (
           <input
             ref={inputRef}
-            className="editable-cell w-20 text-sm border-0 bg-transparent p-0 text-center"
+            type="number"
+            className="editable-cell w-24 text-sm border-0 bg-transparent p-0 text-center"
             value={tempVal}
             onChange={(e) => setTempVal(e.target.value)}
             onBlur={commitEdit}
@@ -310,18 +324,19 @@ function PriceRow({
         ) : (
           <span
             className={isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}
-            onClick={() => startEdit("faceValue", item.faceValue)}
+            onClick={() => startEdit("sellPrice", String(item.sellPrice))}
           >
-            {item.faceValue}
+            {formatPrice(item.sellPrice)}
           </span>
         )}
       </td>
-      {/* 매입률 */}
+      {/* 파실때 할인율 */}
       <td className="px-3 py-3 text-sm text-center">
-        {isAdmin && editing === "buyRate" ? (
+        {isAdmin && editing === "sellDiscount" ? (
           <input
             ref={inputRef}
             type="number"
+            step="0.1"
             className="editable-cell w-16 text-sm border-0 bg-transparent p-0 text-center"
             value={tempVal}
             onChange={(e) => setTempVal(e.target.value)}
@@ -331,40 +346,54 @@ function PriceRow({
         ) : (
           <span
             className={`inline-flex items-center gap-1 ${isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}`}
-            onClick={() => startEdit("buyRate", String(item.buyRate))}
+            onClick={() => startEdit("sellDiscount", String(item.sellDiscount))}
           >
-            <span className="font-bold text-[oklch(0.45_0.15_145)]">{item.buyRate}%</span>
+            <span className="font-bold text-[oklch(0.45_0.15_145)]">{item.sellDiscount.toFixed(1)}%</span>
           </span>
         )}
       </td>
-      {/* 매입가 */}
-      <td className="px-3 py-3 text-sm text-center font-semibold text-[oklch(0.35_0.1_145)]">
-        {item.buyPrice}
-      </td>
-      {/* 판매률 */}
-      <td className="px-3 py-3 text-sm text-center">
-        {isAdmin && editing === "sellRate" ? (
-          <input
-            ref={inputRef}
-            type="number"
-            className="editable-cell w-16 text-sm border-0 bg-transparent p-0 text-center"
-            value={tempVal}
-            onChange={(e) => setTempVal(e.target.value)}
-            onBlur={commitEdit}
-            onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditing(null); }}
-          />
-        ) : (
-          <span
-            className={`inline-flex items-center gap-1 ${isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}`}
-            onClick={() => startEdit("sellRate", String(item.sellRate))}
-          >
-            <span className="font-bold text-[oklch(0.45_0.12_255)]">{item.sellRate}%</span>
-          </span>
-        )}
-      </td>
-      {/* 판매가 */}
+      {/* 사실때(현금) 가격 */}
       <td className="px-3 py-3 text-sm text-center font-semibold text-[oklch(0.35_0.1_255)]">
-        {item.sellPrice}
+        {isAdmin && editing === "buyPrice" ? (
+          <input
+            ref={inputRef}
+            type="number"
+            className="editable-cell w-24 text-sm border-0 bg-transparent p-0 text-center"
+            value={tempVal}
+            onChange={(e) => setTempVal(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditing(null); }}
+          />
+        ) : (
+          <span
+            className={isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}
+            onClick={() => startEdit("buyPrice", String(item.buyPrice))}
+          >
+            {formatPrice(item.buyPrice)}
+          </span>
+        )}
+      </td>
+      {/* 사실때 할인율 */}
+      <td className="px-3 py-3 text-sm text-center">
+        {isAdmin && editing === "buyDiscount" ? (
+          <input
+            ref={inputRef}
+            type="number"
+            step="0.1"
+            className="editable-cell w-16 text-sm border-0 bg-transparent p-0 text-center"
+            value={tempVal}
+            onChange={(e) => setTempVal(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditing(null); }}
+          />
+        ) : (
+          <span
+            className={`inline-flex items-center gap-1 ${isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}`}
+            onClick={() => startEdit("buyDiscount", String(item.buyDiscount))}
+          >
+            <span className="font-bold text-[oklch(0.45_0.12_255)]">{item.buyDiscount.toFixed(1)}%</span>
+          </span>
+        )}
       </td>
       {/* 비고 */}
       <td className="px-3 py-3 text-sm text-center text-muted-foreground">
@@ -413,196 +442,36 @@ function PriceRow({
   );
 }
 
-// ─── 모바일 카드 뷰 ───────────────────────────────────────────────────────
-function MobileCard({
-  item,
-  isAdmin,
-  onChange,
-  onDelete,
-}: {
-  item: GiftCardItem;
-  isAdmin: boolean;
-  onChange: (updated: GiftCardItem) => void;
-  onDelete: () => void;
-}) {
-  const [editField, setEditField] = useState<string | null>(null);
-  const [tempVal, setTempVal] = useState("");
-
-  const startEdit = (field: string, val: string) => {
-    if (!isAdmin) return;
-    setEditField(field);
-    setTempVal(val);
-  };
-
-  const commitEdit = (field: string) => {
-    const updated = { ...item };
-    if (field === "buyRate") {
-      const rate = Math.min(100, Math.max(1, Number(tempVal) || item.buyRate));
-      updated.buyRate = rate;
-      updated.buyPrice = calcPriceFromRate(item.faceValue, rate);
-    } else if (field === "sellRate") {
-      const rate = Math.min(100, Math.max(1, Number(tempVal) || item.sellRate));
-      updated.sellRate = rate;
-      updated.sellPrice = calcPriceFromRate(item.faceValue, rate);
-    } else if (field === "note") {
-      updated.note = tempVal;
-    }
-    onChange(updated);
-    setEditField(null);
-  };
-
-  return (
-    <div className={`rounded-xl border border-[oklch(0.88_0.01_255)] bg-white shadow-sm overflow-hidden ${!item.available ? "opacity-50" : ""}`}>
-      {/* 카드 헤더 */}
-      <div className="bg-[oklch(0.18_0.04_255)] px-4 py-2.5 flex items-center justify-between">
-        <div>
-          <span className="text-white font-semibold text-sm">{item.name}</span>
-          <span className="ml-2 text-[oklch(0.78_0.12_80)] font-bold text-sm">{item.faceValue}</span>
-        </div>
-        {isAdmin && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onChange({ ...item, available: !item.available })}
-              className="text-xs text-white/70 hover:text-white"
-            >
-              {item.available ? "취급중" : "미취급"}
-            </button>
-            <button onClick={onDelete} className="text-red-400 hover:text-red-300">
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-      </div>
-      {/* 카드 바디 */}
-      <div className="grid grid-cols-2 divide-x divide-[oklch(0.88_0.01_255)]">
-        {/* 매입 */}
-        <div className="p-3">
-          <p className="text-xs text-muted-foreground mb-1">매입가</p>
-          <p className="text-lg font-bold text-[oklch(0.35_0.1_145)]">{item.buyPrice}</p>
-          <div className="flex items-center gap-1 mt-1">
-            {editField === "buyRate" ? (
-              <input
-                type="number"
-                className="w-14 text-xs border rounded px-1 py-0.5"
-                value={tempVal}
-                autoFocus
-                onChange={(e) => setTempVal(e.target.value)}
-                onBlur={() => commitEdit("buyRate")}
-                onKeyDown={(e) => { if (e.key === "Enter") commitEdit("buyRate"); }}
-              />
-            ) : (
-              <span
-                className={`text-xs text-[oklch(0.45_0.15_145)] font-medium ${isAdmin ? "cursor-pointer underline decoration-dotted" : ""}`}
-                onClick={() => startEdit("buyRate", String(item.buyRate))}
-              >
-                {item.buyRate}%
-              </span>
-            )}
-          </div>
-        </div>
-        {/* 판매 */}
-        <div className="p-3">
-          <p className="text-xs text-muted-foreground mb-1">판매가</p>
-          <p className="text-lg font-bold text-[oklch(0.35_0.1_255)]">{item.sellPrice}</p>
-          <div className="flex items-center gap-1 mt-1">
-            {editField === "sellRate" ? (
-              <input
-                type="number"
-                className="w-14 text-xs border rounded px-1 py-0.5"
-                value={tempVal}
-                autoFocus
-                onChange={(e) => setTempVal(e.target.value)}
-                onBlur={() => commitEdit("sellRate")}
-                onKeyDown={(e) => { if (e.key === "Enter") commitEdit("sellRate"); }}
-              />
-            ) : (
-              <span
-                className={`text-xs text-[oklch(0.45_0.12_255)] font-medium ${isAdmin ? "cursor-pointer underline decoration-dotted" : ""}`}
-                onClick={() => startEdit("sellRate", String(item.sellRate))}
-              >
-                {item.sellRate}%
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-      {/* 비고 */}
-      {(item.note || isAdmin) && (
-        <div className="px-3 py-2 bg-[oklch(0.97_0.005_255)] border-t border-[oklch(0.88_0.01_255)]">
-          {editField === "note" ? (
-            <input
-              className="w-full text-xs border rounded px-1 py-0.5"
-              value={tempVal}
-              autoFocus
-              onChange={(e) => setTempVal(e.target.value)}
-              onBlur={() => commitEdit("note")}
-              onKeyDown={(e) => { if (e.key === "Enter") commitEdit("note"); }}
-            />
-          ) : (
-            <p
-              className={`text-xs text-muted-foreground ${isAdmin ? "cursor-pointer" : ""}`}
-              onClick={() => startEdit("note", item.note)}
-            >
-              {item.note || (isAdmin ? "비고 입력..." : "")}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── 메인 페이지 ─────────────────────────────────────────────────────────
 export default function Home() {
-  const [data, setData] = useState<GiftCardCategory[]>([]);
-  const [activeTab, setActiveTab] = useState("");
+  const [data, setData] = useState<GiftCardItem[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [changePwOpen, setChangePwOpen] = useState(false);
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const d = loadData();
     setData(d);
-    if (d.length > 0) setActiveTab(d[0].id);
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const activeCategory = data.find((c) => c.id === activeTab);
-
-  const updateItem = (catId: string, itemId: string, updated: GiftCardItem) => {
+  const updateItem = (itemId: string, updated: GiftCardItem) => {
     setData((prev) =>
-      prev.map((cat) =>
-        cat.id === catId
-          ? { ...cat, items: cat.items.map((it) => (it.id === itemId ? updated : it)) }
-          : cat
-      )
+      prev.map((it) => (it.id === itemId ? updated : it))
     );
     setHasChanges(true);
   };
 
-  const deleteItem = (catId: string, itemId: string) => {
-    setData((prev) =>
-      prev.map((cat) =>
-        cat.id === catId ? { ...cat, items: cat.items.filter((it) => it.id !== itemId) } : cat
-      )
-    );
+  const deleteItem = (itemId: string) => {
+    setData((prev) => prev.filter((it) => it.id !== itemId));
     setHasChanges(true);
   };
 
   const addItem = (item: Omit<GiftCardItem, "id">) => {
     const id = `item_${Date.now()}`;
-    setData((prev) =>
-      prev.map((cat) =>
-        cat.id === activeTab ? { ...cat, items: [...cat.items, { ...item, id }] } : cat
-      )
-    );
+    setData((prev) => [...prev, { ...item, id }]);
     setHasChanges(true);
     toast.success("항목이 추가되었습니다.");
   };
@@ -633,6 +502,17 @@ export default function Home() {
   const now = new Date();
   const timeStr = now.toLocaleString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
 
+  // 카테고리별로 그룹화 (표시용)
+  const groupedByCategory: Record<string, GiftCardItem[]> = {};
+  data.forEach((item) => {
+    if (!groupedByCategory[item.category]) {
+      groupedByCategory[item.category] = [];
+    }
+    groupedByCategory[item.category].push(item);
+  });
+
+  const categoryOrder = ["대형마트", "모바일상품권", "백화점", "전자제품", "할인점", "주유소", "음식점", "문화", "기프트카드"];
+
   return (
     <div className="min-h-screen flex flex-col bg-[oklch(0.97_0.005_255)]">
       {/* ── 상단 헤더 ── */}
@@ -642,14 +522,14 @@ export default function Home() {
             {/* 로고 */}
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[oklch(0.78_0.12_80)] flex items-center justify-center shadow-md">
-                <span className="text-[oklch(0.18_0.04_255)] font-black text-base md:text-lg leading-none">원</span>
+                <span className="text-[oklch(0.18_0.04_255)] font-black text-base md:text-lg leading-none">티</span>
               </div>
               <div>
-                <h1 className="text-white font-black text-base md:text-xl leading-tight tracking-tight">
-                  원천상품권
+                <h1 className="text-white font-black text-base md:text-lg leading-tight tracking-tight">
+                  티켓나라 스타필드수원
                 </h1>
                 <p className="text-[oklch(0.78_0.12_80)] text-[10px] md:text-xs font-medium leading-none mt-0.5">
-                  수원 광교 상품권 매입·판매
+                  상품권 매입·판매 시세 안내
                 </p>
               </div>
             </div>
@@ -719,7 +599,7 @@ export default function Home() {
                 <span className="text-[oklch(0.78_0.12_80)]">최신 시세 안내</span>
               </h2>
               <p className="text-white/70 text-sm md:text-base max-w-md">
-                원천상품권에서 투명하고 정직한 시세로 상품권을 매입·판매합니다.
+                티켓나라 스타필드수원에서 투명하고 정직한 시세로 상품권을 매입·판매합니다.
                 방문 전 시세를 확인하세요.
               </p>
             </div>
@@ -731,7 +611,7 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="text-white/50 text-[10px] font-medium uppercase tracking-wide">전화문의</p>
-                  <p className="text-white font-bold text-base leading-tight">031-000-0000</p>
+                  <p className="text-white font-bold text-base leading-tight">010-9650-5566</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-[oklch(0.24_0.05_255)] rounded-xl px-4 py-3 min-w-[180px]">
@@ -740,16 +620,16 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="text-white/50 text-[10px] font-medium uppercase tracking-wide">영업시간</p>
-                  <p className="text-white font-bold text-sm leading-tight">평일 09:00 ~ 18:00</p>
+                  <p className="text-white font-bold text-sm leading-tight">10:00 ~ 19:00</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-[oklch(0.24_0.05_255)] rounded-xl px-4 py-3 min-w-[180px]">
+              <div className="flex items-center gap-3 bg-[oklch(0.24_0.05_255)] rounded-xl px-4 py-3 min-w-[200px]">
                 <div className="w-9 h-9 rounded-lg bg-[oklch(0.78_0.12_80)/20] flex items-center justify-center flex-shrink-0">
                   <MapPin className="w-4 h-4 text-[oklch(0.78_0.12_80)]" />
                 </div>
                 <div>
                   <p className="text-white/50 text-[10px] font-medium uppercase tracking-wide">위치</p>
-                  <p className="text-white font-bold text-sm leading-tight">수원시 영통구 광교</p>
+                  <p className="text-white font-bold text-xs leading-tight">수원시 장안구 수성로 157번길60</p>
                 </div>
               </div>
             </div>
@@ -778,158 +658,110 @@ export default function Home() {
             </div>
           )}
 
-          {/* 카테고리 탭 */}
-          <div className="flex gap-1.5 md:gap-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
-            {data.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
-                className={`flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
-                  activeTab === cat.id
-                    ? "bg-[oklch(0.18_0.04_255)] text-white shadow-md scale-[1.02]"
-                    : "bg-white text-[oklch(0.4_0.03_255)] border border-[oklch(0.88_0.01_255)] hover:border-[oklch(0.18_0.04_255)] hover:text-[oklch(0.18_0.04_255)]"
-                }`}
-              >
-                <span className="text-base leading-none">{cat.icon}</span>
-                <span>{cat.label}</span>
-                <span className={`text-xs rounded-full px-1.5 py-0.5 ${
-                  activeTab === cat.id
-                    ? "bg-[oklch(0.78_0.12_80)] text-[oklch(0.15_0.04_255)]"
-                    : "bg-[oklch(0.93_0.01_255)] text-muted-foreground"
-                }`}>
-                  {cat.items.filter(i => i.available).length}
-                </span>
-              </button>
-            ))}
+          {/* 안내문구 */}
+          <div className="mb-6 bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] p-4 md:p-6 shadow-sm">
+            <h3 className="font-black text-[oklch(0.18_0.04_255)] mb-3 text-lg">거래 안내사항</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-[oklch(0.78_0.12_80)] font-bold flex-shrink-0">-</span>
+                <span>구매시 방문 현금결제만 가능합니다. (수표X, 카드X)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[oklch(0.78_0.12_80)] font-bold flex-shrink-0">-</span>
+                <span>상품권 거래시 시세표와 같이 거래합니다. (도착당시 시세 적용)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[oklch(0.78_0.12_80)] font-bold flex-shrink-0">-</span>
+                <span>상품권 판매시 현금지급 가능 시세변동 (문의바람)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[oklch(0.78_0.12_80)] font-bold flex-shrink-0">-</span>
+                <span>상품권 상태(훼손, 구권)에 따라 거래불가 / 가격변동 될 수 있습니다.</span>
+              </li>
+            </ul>
           </div>
 
-          {/* 가격표 */}
-          {activeCategory && (
-            <div className="bg-white rounded-2xl shadow-sm border border-[oklch(0.88_0.01_255)] overflow-hidden">
-              {/* 섹션 헤더 */}
-              <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-[oklch(0.88_0.01_255)]">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{activeCategory.icon}</span>
-                  <div>
-                    <h3 className="font-black text-[oklch(0.18_0.04_255)] text-lg leading-tight">
-                      {activeCategory.label}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {activeCategory.items.filter(i => i.available).length}개 취급 중
-                    </p>
-                  </div>
-                </div>
-                {isAdmin && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setAddItemOpen(true)}
-                      className="flex items-center gap-1.5 text-sm font-semibold text-[oklch(0.18_0.04_255)] border border-[oklch(0.88_0.01_255)] px-3 py-1.5 rounded-lg hover:bg-[oklch(0.93_0.01_255)] transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      항목 추가
-                    </button>
-                    <button
-                      onClick={handleReset}
-                      className="flex items-center gap-1.5 text-sm text-muted-foreground border border-[oklch(0.88_0.01_255)] px-3 py-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">초기화</span>
-                    </button>
-                  </div>
-                )}
+          {/* 통합 시세표 */}
+          <div className="bg-white rounded-2xl shadow-sm border border-[oklch(0.88_0.01_255)] overflow-hidden">
+            {/* 섹션 헤더 */}
+            <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-[oklch(0.88_0.01_255)]">
+              <div>
+                <h3 className="font-black text-[oklch(0.18_0.04_255)] text-lg leading-tight">
+                  상품권 시세표
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {data.filter(i => i.available).length}개 취급 중 / 총 {data.length}개 항목
+                </p>
               </div>
-
-              {/* 데스크탑: 테이블 뷰 */}
-              {!isMobile ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-[oklch(0.18_0.04_255)]">
-                        <th className="px-3 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider">상품권명</th>
-                        <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">권면가</th>
-                        <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.78_0.12_80)] uppercase tracking-wider">매입률</th>
-                        <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.78_0.12_80)] uppercase tracking-wider">매입가</th>
-                        <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.7_0.1_255)] uppercase tracking-wider">판매률</th>
-                        <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.7_0.1_255)] uppercase tracking-wider">판매가</th>
-                        <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">비고</th>
-                        {isAdmin && <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">관리</th>}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[oklch(0.92_0.005_255)]">
-                      {activeCategory.items.map((item, idx) => (
-                        <PriceRow
-                          key={item.id}
-                          item={item}
-                          isAdmin={isAdmin}
-                          isEven={idx % 2 === 0}
-                          onChange={(updated) => updateItem(activeCategory.id, item.id, updated)}
-                          onDelete={() => deleteItem(activeCategory.id, item.id)}
-                        />
-                      ))}
-                      {activeCategory.items.length === 0 && (
-                        <tr>
-                          <td colSpan={isAdmin ? 8 : 7} className="text-center py-12 text-muted-foreground text-sm">
-                            등록된 항목이 없습니다.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                /* 모바일: 카드 뷰 */
-                <div className="p-4 grid grid-cols-1 gap-3">
-                  {activeCategory.items.map((item) => (
-                    <MobileCard
-                      key={item.id}
-                      item={item}
-                      isAdmin={isAdmin}
-                      onChange={(updated) => updateItem(activeCategory.id, item.id, updated)}
-                      onDelete={() => deleteItem(activeCategory.id, item.id)}
-                    />
-                  ))}
-                  {activeCategory.items.length === 0 && (
-                    <p className="text-center py-8 text-muted-foreground text-sm">등록된 항목이 없습니다.</p>
-                  )}
-                  {isAdmin && (
-                    <button
-                      onClick={() => setAddItemOpen(true)}
-                      className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-[oklch(0.88_0.01_255)] rounded-xl py-4 text-sm text-muted-foreground hover:border-[oklch(0.78_0.12_80)] hover:text-[oklch(0.65_0.13_78)] transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      항목 추가
-                    </button>
-                  )}
+              {isAdmin && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setAddItemOpen(true)}
+                    className="flex items-center gap-1.5 text-sm font-semibold text-[oklch(0.18_0.04_255)] border border-[oklch(0.88_0.01_255)] px-3 py-1.5 rounded-lg hover:bg-[oklch(0.93_0.01_255)] transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    항목 추가
+                  </button>
+                  <button
+                    onClick={handleReset}
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground border border-[oklch(0.88_0.01_255)] px-3 py-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">초기화</span>
+                  </button>
                 </div>
               )}
             </div>
-          )}
 
-          {/* 안내사항 */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] p-5 shadow-sm">
-              <h4 className="font-black text-[oklch(0.18_0.04_255)] mb-3 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-md bg-[oklch(0.78_0.12_80)] flex items-center justify-center text-[oklch(0.15_0.04_255)] text-xs font-black">매</span>
-                매입 안내
-              </h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />상품권 실물 또는 핀번호 매입 가능합니다.</li>
-                <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />매입 후 즉시 현금 지급합니다.</li>
-                <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />대량 매입 시 별도 협의 가능합니다.</li>
-                <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-[oklch(0.78_0.12_80)] flex-shrink-0 mt-0.5" />유효기간 만료 상품권은 매입 불가합니다.</li>
-              </ul>
-            </div>
-            <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] p-5 shadow-sm">
-              <h4 className="font-black text-[oklch(0.18_0.04_255)] mb-3 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-md bg-[oklch(0.5_0.1_255)] flex items-center justify-center text-white text-xs font-black">판</span>
-                판매 안내
-              </h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-[oklch(0.5_0.1_255)] flex-shrink-0 mt-0.5" />시중보다 저렴한 가격으로 판매합니다.</li>
-                <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-[oklch(0.5_0.1_255)] flex-shrink-0 mt-0.5" />정품 상품권만 취급합니다.</li>
-                <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-[oklch(0.5_0.1_255)] flex-shrink-0 mt-0.5" />재고 소진 시 판매가 중단될 수 있습니다.</li>
-                <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-[oklch(0.5_0.1_255)] flex-shrink-0 mt-0.5" />구매 후 환불은 불가합니다.</li>
-              </ul>
+            {/* 테이블 */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[oklch(0.18_0.04_255)]">
+                    <th className="px-3 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider">상품권명</th>
+                    <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.78_0.12_80)] uppercase tracking-wider">파실때(이체)</th>
+                    <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.78_0.12_80)] uppercase tracking-wider">할인율</th>
+                    <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.7_0.1_255)] uppercase tracking-wider">사실때(현금)</th>
+                    <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.7_0.1_255)] uppercase tracking-wider">할인율</th>
+                    <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">비고</th>
+                    {isAdmin && <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">관리</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[oklch(0.92_0.005_255)]">
+                  {categoryOrder.map((cat) => {
+                    const items = groupedByCategory[cat] || [];
+                    if (items.length === 0) return null;
+                    return (
+                      <tbody key={cat}>
+                        {/* 카테고리 구분 행 */}
+                        <tr className="bg-[oklch(0.93_0.01_255)]">
+                          <td colSpan={isAdmin ? 7 : 6} className="px-3 py-2 text-xs font-bold text-[oklch(0.18_0.04_255)] uppercase tracking-wider">
+                            {cat}
+                          </td>
+                        </tr>
+                        {/* 항목 행 */}
+                        {items.map((item, idx) => (
+                          <PriceRow
+                            key={item.id}
+                            item={item}
+                            isAdmin={isAdmin}
+                            isEven={idx % 2 === 0}
+                            onChange={(updated) => updateItem(item.id, updated)}
+                            onDelete={() => deleteItem(item.id)}
+                          />
+                        ))}
+                      </tbody>
+                    );
+                  })}
+                  {data.length === 0 && (
+                    <tr>
+                      <td colSpan={isAdmin ? 7 : 6} className="text-center py-12 text-muted-foreground text-sm">
+                        등록된 항목이 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -945,15 +777,15 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-7 h-7 rounded-md bg-[oklch(0.78_0.12_80)] flex items-center justify-center">
-                  <span className="text-[oklch(0.18_0.04_255)] font-black text-sm">원</span>
+                  <span className="text-[oklch(0.18_0.04_255)] font-black text-sm">티</span>
                 </div>
-                <span className="text-white font-bold text-base">원천상품권</span>
+                <span className="text-white font-bold text-base">티켓나라 스타필드수원</span>
               </div>
-              <p className="text-xs">수원시 영통구 광교 | 사업자등록번호: 000-00-00000</p>
-              <p className="text-xs mt-1">Tel: 031-000-0000 | 평일 09:00 ~ 18:00 (주말·공휴일 휴무)</p>
+              <p className="text-xs">수원시 장안구 수성로 157번길60 [화서역푸르지오 브리시엘상가 133호]</p>
+              <p className="text-xs mt-1">Tel: 010-9650-5566 | 평일 10:00 ~ 19:00</p>
             </div>
             <div className="text-xs">
-              <p>© 2024 원천상품권. All rights reserved.</p>
+              <p>© 2024 티켓나라 스타필드수원. All rights reserved.</p>
               <p className="mt-1 text-white/40">시세는 시장 상황에 따라 변동될 수 있습니다.</p>
             </div>
           </div>
@@ -967,17 +799,14 @@ export default function Home() {
         onSuccess={() => { setIsAdmin(true); setLoginOpen(false); toast.success("관리자 모드가 활성화되었습니다."); }}
       />
       <ChangePwDialog open={changePwOpen} onClose={() => setChangePwOpen(false)} />
-      {activeCategory && (
-        <AddItemDialog
-          open={addItemOpen}
-          onClose={() => setAddItemOpen(false)}
-          onAdd={addItem}
-          categoryName={activeCategory.label}
-        />
-      )}
+      <AddItemDialog
+        open={addItemOpen}
+        onClose={() => setAddItemOpen(false)}
+        onAdd={addItem}
+      />
 
       {/* ── 플로팅 저장 버튼 (모바일 관리자) ── */}
-      {isAdmin && hasChanges && isMobile && (
+      {isAdmin && hasChanges && (
         <div className="fixed bottom-4 right-4 z-50">
           <button
             onClick={handleSave}
