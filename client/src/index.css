@@ -46,7 +46,7 @@
 }
 
 :root {
-  /* Design: Deep Navy + Gold (#c9a227) — 신뢰·안정·가치 */
+  /* Design: Deep Navy + Gold — 신뢰·안정·가치 */
   --navy: oklch(0.18 0.04 255);
   --navy-light: oklch(0.24 0.05 255);
   --gold: oklch(0.78 0.12 80);
