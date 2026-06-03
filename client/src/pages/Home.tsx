@@ -3,7 +3,7 @@
  * Design: Deep Navy (#0a1628) + Gold (#c9a227) — 신뢰·안정·가치
  * Layout: 스티키 헤더 → 히어로 배너 → 안내문구 → 통합 시세표 (카테고리 탭 없음) → 푸터
  */
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import {
   loadData,
@@ -286,11 +286,14 @@ function PriceRow({
 
   const rowBg = isEven ? "bg-white" : "bg-[oklch(0.97_0.005_255)]";
   const unavailableStyle = !item.available ? "opacity-40" : "";
+  // 열별 배경색
+  const sellBg = isEven ? "bg-[oklch(0.96_0.01_200)]" : "bg-[oklch(0.93_0.02_200)]";
+  const buyBg = isEven ? "bg-[oklch(0.96_0.01_10)]" : "bg-[oklch(0.93_0.02_10)]";
 
   return (
     <tr className={`${rowBg} ${unavailableStyle} transition-colors hover:bg-[oklch(0.93_0.01_255)/50]`}>
       {/* 상품권명 */}
-      <td className="px-3 py-3 text-sm font-medium text-[oklch(0.18_0.04_255)]">
+      <td className="px-3 py-3 text-sm font-medium text-[oklch(0.18_0.04_255)] text-center">
         {isAdmin && editing === "name" ? (
           <input
             ref={inputRef}
@@ -310,7 +313,7 @@ function PriceRow({
         )}
       </td>
       {/* 파실때(이체) 가격 */}
-      <td className="px-3 py-3 text-sm text-center font-semibold text-[oklch(0.35_0.1_145)]">
+      <td className={`${sellBg} px-3 py-3 text-sm text-center font-semibold text-[oklch(0.3_0.08_200)]`}>
         {isAdmin && editing === "sellPrice" ? (
           <input
             ref={inputRef}
@@ -331,7 +334,7 @@ function PriceRow({
         )}
       </td>
       {/* 파실때 할인율 */}
-      <td className="px-3 py-3 text-sm text-center">
+      <td className={`${sellBg} px-3 py-3 text-sm text-center`}>
         {isAdmin && editing === "sellDiscount" ? (
           <input
             ref={inputRef}
@@ -348,12 +351,12 @@ function PriceRow({
             className={`inline-flex items-center gap-1 ${isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}`}
             onClick={() => startEdit("sellDiscount", String(item.sellDiscount))}
           >
-            <span className="font-bold text-[oklch(0.45_0.15_145)]">{item.sellDiscount.toFixed(1)}%</span>
+            <span className="font-bold text-[oklch(0.3_0.08_200)]">{item.sellDiscount.toFixed(1)}%</span>
           </span>
         )}
       </td>
       {/* 사실때(현금) 가격 */}
-      <td className="px-3 py-3 text-sm text-center font-semibold text-[oklch(0.35_0.1_255)]">
+      <td className={`${buyBg} px-3 py-3 text-sm text-center font-semibold text-[oklch(0.3_0.08_10)]`}>
         {isAdmin && editing === "buyPrice" ? (
           <input
             ref={inputRef}
@@ -374,7 +377,7 @@ function PriceRow({
         )}
       </td>
       {/* 사실때 할인율 */}
-      <td className="px-3 py-3 text-sm text-center">
+      <td className={`${buyBg} px-3 py-3 text-sm text-center`}>
         {isAdmin && editing === "buyDiscount" ? (
           <input
             ref={inputRef}
@@ -391,7 +394,7 @@ function PriceRow({
             className={`inline-flex items-center gap-1 ${isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}`}
             onClick={() => startEdit("buyDiscount", String(item.buyDiscount))}
           >
-            <span className="font-bold text-[oklch(0.45_0.12_255)]">{item.buyDiscount.toFixed(1)}%</span>
+            <span className="font-bold text-[oklch(0.3_0.08_10)]">{item.buyDiscount.toFixed(1)}%</span>
           </span>
         )}
       </td>
@@ -718,11 +721,11 @@ export default function Home() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-[oklch(0.18_0.04_255)]">
-                    <th className="px-3 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider">상품권명</th>
-                    <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.78_0.12_80)] uppercase tracking-wider">파실때(이체)</th>
-                    <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.78_0.12_80)] uppercase tracking-wider">할인율</th>
-                    <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.7_0.1_255)] uppercase tracking-wider">사실때(현금)</th>
-                    <th className="px-3 py-3 text-center text-xs font-bold text-[oklch(0.7_0.1_255)] uppercase tracking-wider">할인율</th>
+                    <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">상품권명</th>
+                    <th className="bg-[oklch(0.93_0.02_200)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider">파실때(이체)</th>
+                    <th className="bg-[oklch(0.93_0.02_200)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_200)] uppercase tracking-wider">할인율</th>
+                    <th className="bg-[oklch(0.93_0.02_10)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider">사실때(현금)</th>
+                    <th className="bg-[oklch(0.93_0.02_10)] px-3 py-3 text-center text-xs font-bold text-[oklch(0.3_0.08_10)] uppercase tracking-wider">할인율</th>
                     <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">비고</th>
                     {isAdmin && <th className="px-3 py-3 text-center text-xs font-bold text-white/80 uppercase tracking-wider">관리</th>}
                   </tr>
@@ -732,9 +735,9 @@ export default function Home() {
                     const items = groupedByCategory[cat] || [];
                     if (items.length === 0) return null;
                     return (
-                      <>
+                      <React.Fragment key={`cat-${cat}`}>
                         {/* 카테고리 구분 행 */}
-                        <tr key={`cat-${cat}`} className="bg-[oklch(0.93_0.01_255)]">
+                        <tr className="bg-[oklch(0.93_0.01_255)]">
                           <td colSpan={isAdmin ? 7 : 6} className="px-3 py-2 text-xs font-bold text-[oklch(0.18_0.04_255)] uppercase tracking-wider">
                             {cat}
                           </td>
@@ -750,7 +753,7 @@ export default function Home() {
                             onDelete={() => deleteItem(item.id)}
                           />
                         ))}
-                      </>
+                      </React.Fragment>
                     );
                   })}
                   {data.length === 0 && (
