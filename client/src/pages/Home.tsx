@@ -587,7 +587,7 @@ export default function Home() {
       {/* 스티키 헤더 */}
       <header className="sticky top-0 z-50 bg-gradient-to-r from-[oklch(0.18_0.04_255)] to-[oklch(0.25_0.04_255)] text-white shadow-md">
         <div className="container flex items-center justify-between py-3 md:py-4">
-          <h1 className="text-lg md:text-xl font-bold">티켓나라 스타필드수원</h1>
+          <h1 className="text-lg md:text-xl font-bold" style={{color: '#ffa200', fontSize: '32px', fontWeight: '800', color: '#ffa200', fontSize: '32px'}}>티켓나라 스타필드수원</h1>
           <div className="flex items-center gap-2 md:gap-3">
             {isAdmin && (
               <>
@@ -615,21 +615,21 @@ export default function Home() {
         {/* 히어로 배너 */}
         <section className="bg-gradient-to-r from-[oklch(0.18_0.04_255)] to-[oklch(0.25_0.04_255)] text-white py-8 md:py-12">
           <div className="container">
-            <h2 className="text-3xl md:text-4xl font-bold mb-2 text-[oklch(0.85_0.15_80)]">상품권 매입·판매</h2>
-            <p className="text-lg md:text-xl text-white/80 mb-6 md:mb-8">국내 최대 상품권 전문거래소 -티켓나라</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-2 text-[oklch(0.85_0.15_80)]" style={{color: '#ffa200', fontSize: '31px', color: '#ffa200', fontSize: '31px'}}>할인상품권 구입해서 알뜰쇼핑</h2>
+            <p className="text-lg md:text-xl text-white/80 mb-6 md:mb-8" style={{color: '#ffa200', fontWeight: '700', fontWeight: '700'}}>국내최대 상품권할인 전문거래소 - 티켓나라</p>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
               <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
                 <Phone className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
                 <div>
                   <p className="text-xs md:text-sm text-white/70">전화문의</p>
-                  <p className="text-base md:text-lg font-semibold">010-9650-5566</p>
+                  <p className="text-base md:text-lg font-semibold" style={{color: '#ffae00', fontSize: '24px'}}>010-9650-5566</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
                 <Clock className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
                 <div>
                   <p className="text-xs md:text-sm text-white/70">영업시간</p>
-                  <p className="text-base md:text-lg font-semibold">10:00 ~ 19:00</p>
+                  <p className="text-base md:text-lg font-semibold" style={{fontSize: '24px'}} style={{color: '#ffa200'}}>10:00 ~ 19:00</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
@@ -639,7 +639,7 @@ export default function Home() {
                   <p className="text-sm md:text-base font-semibold">수원시 장안구 수성로 157번길60 [브리시엘상가 133호]</p>
                 </div>
               </div>
-              <a href="https://pf.kakao.com/_xnxnxnxn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-lg p-4 transition-colors">
+              <a href="https://pf.kakao.com/_RCxmGX" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-lg p-4 transition-colors">
                 <div className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0 flex items-center justify-center">
                   <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 5.58 2 10c0 2.54 1.19 4.85 3.15 6.37V22l4.1-2.3c.85.2 1.75.3 2.75.3 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
@@ -679,10 +679,10 @@ export default function Home() {
             <div className="mb-6 bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] p-4 md:p-6 shadow-sm">
               <h3 className="font-black text-[oklch(0.18_0.04_255)] mb-3 text-lg text-center">거래 안내사항</h3>
               <ul className="space-y-2 text-sm md:text-base text-muted-foreground text-center">
-                <li>구매시 방문 현금결제만 가능합니다. (수표X, 카드X)</li>
-                <li>상품권 거래시 시세표와 같이 거래합니다. (도착당시 시세 적용)</li>
-                <li>상품권 판매시 현금지급 가능 시세변동 (문의바람)</li>
-                <li>상품권 상태(훼손, 구권)에 따라 거래불가 / 가격인하 될 수 있습니다.</li>
+                <li style={{fontWeight: '700'}}>구매시 방문 현금결제만 가능합니다. (수표X, 카드X)</li>
+                <li style={{fontWeight: '700'}}>상품권 거래시 시세표와 같이 거래합니다. (도착당시 시세 적용)</li>
+                <li style={{fontWeight: '700'}}>상품권 판매시 현금지급 가능 시세변동 (문의바람)</li>
+                <li style={{fontWeight: '700'}}>상품권 상태(훼손, 구권)에 따라 거래불가 / 할인율 변경 될 수 있습니다.</li>
               </ul>
             </div>
 
@@ -690,7 +690,7 @@ export default function Home() {
             <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] overflow-hidden shadow-sm">
               <div className="bg-[oklch(0.18_0.04_255)] text-white px-4 md:px-6 py-4">
                 <h3 className="text-xl md:text-2xl font-bold"></h3>
-                <p className="text-xs md:text-sm text-white/60 mt-2">77개 카테고리 / 총 78개 항목</p>
+                <p className="text-xs md:text-sm text-white/60 mt-2"></p>
               </div>
 
               {/* 관리 버튼 */}
