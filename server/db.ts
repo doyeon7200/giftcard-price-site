@@ -153,8 +153,9 @@ export async function deleteGiftcard(id: number): Promise<boolean> {
   }
 
   try {
-    await db.delete(giftcards).where(eq(giftcards.id, id));
-    return true;
+    const result = await db.delete(giftcards).where(eq(giftcards.id, id));
+    // Check if any rows were affected
+    return result[0].affectedRows > 0;
   } catch (error) {
     console.error("[Database] Failed to delete giftcard:", error);
     return false;

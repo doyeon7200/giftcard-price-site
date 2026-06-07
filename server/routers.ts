@@ -13,6 +13,7 @@ import {
   recordPriceChange,
   getPriceHistory,
 } from "./db";
+import { priceHistoryRouter } from "./routers/priceHistory";
 
 export const appRouter = router({
   system: systemRouter,
@@ -167,18 +168,7 @@ export const appRouter = router({
       }),
   }),
 
-  priceHistory: router({
-    list: publicProcedure
-      .input(z.object({ giftcardId: z.number().int(), limit: z.number().int().optional() }))
-      .query(async ({ input }) => {
-        const history = await getPriceHistory(input.giftcardId, input.limit || 10);
-        return history.map((item) => ({
-          ...item,
-          sellDiscount: item.sellDiscount / 10,
-          buyDiscount: item.buyDiscount / 10,
-        }));
-      }),
-  }),
+  priceHistory: priceHistoryRouter,
 });
 
 export type AppRouter = typeof appRouter;
