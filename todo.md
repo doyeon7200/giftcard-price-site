@@ -37,3 +37,23 @@
 - [x] 모든 기능 통합 테스트
 - [x] 에러 처리 및 엣지 케이스 확인
 - [x] 체크포인트 저장
+
+## 시세표 UI 개선 (추가 요청)
+- [x] 상품권섹션행을 공란으로 변경
+- [x] 행삭제 버튼 추가 (Trash2 아이콘)
+- [x] 헤더 정보 수정 기능 추가 (로그인 시 Edit3 아이콘)
+- [x] 헤더 정보 편집 다이얼로그 구현
+
+## GitHub 커넥터 및 배포
+- [x] GitHub 커넥터 개요 및 설명 문서 작성
+- [x] GitHub 배포 가이드 작성 (GITHUB_DEPLOYMENT_GUIDE.md)
+- [x] GitHub 커넥터 사용 예시 작성 (GITHUB_CONNECTOR_EXAMPLES.md)
+- [x] GitHub 업로드 단계별 가이드 작성 (GITHUB_UPLOAD_STEP_BY_STEP.md)
+- [ ] GitHub 저장소 생성 및 코드 업로드
+- [ ] GitHub 커넥터 활성화
+- [ ] 자동 배포 워크플로우 설정 (선택사항)
+
+## 최종 체크리스트
+- [x] 모든 기능 구현 완료
+- [x] 문서 작성 완료
+- [ ] 최종 체크포인트 저장

@@ -46,6 +46,14 @@ type GiftCardItem = {
   displayOrder: number;
 };
 
+type HeaderInfo = {
+  title: string;
+  subtitle: string;
+  phone: string;
+  hours: string;
+  address: string;
+};
+
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("ko-KR", {
     style: "currency",
@@ -105,6 +113,80 @@ function AdminLoginDialog({
   );
 }
 
+// ─── 헤더 정보 편집 다이얼로그 ───────────────────────────────────────────────
+function EditHeaderDialog({
+  open,
+  onClose,
+  headerInfo,
+  onSave,
+  isLoading,
+}: {
+  open: boolean;
+  onClose: () => void;
+  headerInfo: HeaderInfo;
+  onSave: (info: HeaderInfo) => void;
+  isLoading: boolean;
+}) {
+  const [title, setTitle] = useState(headerInfo.title);
+  const [subtitle, setSubtitle] = useState(headerInfo.subtitle);
+  const [phone, setPhone] = useState(headerInfo.phone);
+  const [hours, setHours] = useState(headerInfo.hours);
+  const [address, setAddress] = useState(headerInfo.address);
+
+  useEffect(() => {
+    setTitle(headerInfo.title);
+    setSubtitle(headerInfo.subtitle);
+    setPhone(headerInfo.phone);
+    setHours(headerInfo.hours);
+    setAddress(headerInfo.address);
+  }, [headerInfo]);
+
+  const handleSave = () => {
+    onSave({ title, subtitle, phone, hours, address });
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>헤더 정보 수정</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold mb-1">제목</label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} disabled={isLoading} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1">부제목</label>
+            <Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} disabled={isLoading} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1">전화번호</label>
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={isLoading} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1">영업시간</label>
+            <Input value={hours} onChange={(e) => setHours(e.target.value)} disabled={isLoading} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1">주소</label>
+            <Input value={address} onChange={(e) => setAddress(e.target.value)} disabled={isLoading} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+            취소
+          </Button>
+          <Button onClick={handleSave} disabled={isLoading}>
+            {isLoading ? "저장 중..." : "저장"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ─── 항목 추가 다이얼로그 ────────────────────────────────────────────────────
 function AddItemDialog({
   open,
@@ -156,14 +238,15 @@ function AddItemDialog({
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold mb-1">상품권명</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
+            <Input value={name} onChange={(e) => setName(e.target.value)} disabled={isLoading} />
           </div>
           <div>
             <label className="block text-xs font-semibold mb-1">카테고리</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-[oklch(0.88_0.01_255)] rounded-lg text-sm"
+              className="w-full px-3 py-2 border border-[oklch(0.88_0.01_255)] rounded-lg text-sm disabled:opacity-50"
+              disabled={isLoading}
             >
               <option>대형마트</option>
               <option>모바일상품권</option>
@@ -179,19 +262,19 @@ function AddItemDialog({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold mb-1">파실때 가격</label>
-              <Input type="number" value={sellPrice} onChange={(e) => setSellPrice(e.target.value)} />
+              <Input type="number" value={sellPrice} onChange={(e) => setSellPrice(e.target.value)} disabled={isLoading} />
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1">할인율(%)</label>
-              <Input type="number" step="0.1" value={sellDiscount} onChange={(e) => setSellDiscount(e.target.value)} />
+              <Input type="number" step="0.1" value={sellDiscount} onChange={(e) => setSellDiscount(e.target.value)} disabled={isLoading} />
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1">사실때 가격</label>
-              <Input type="number" value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} />
+              <Input type="number" value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} disabled={isLoading} />
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1">할인율(%)</label>
-              <Input type="number" step="0.1" value={buyDiscount} onChange={(e) => setBuyDiscount(e.target.value)} />
+              <Input type="number" step="0.1" value={buyDiscount} onChange={(e) => setBuyDiscount(e.target.value)} disabled={isLoading} />
             </div>
           </div>
         </div>
@@ -273,6 +356,7 @@ function PriceRow({
 
   return (
     <tr className={`${rowBg} ${unavailableStyle} transition-colors hover:bg-[oklch(0.93_0.01_255)/50]`}>
+      {/* 상품권명 - 모바일에서 더 크게 */}
       <td className="px-2 md:px-3 py-3 text-sm md:text-base font-medium text-[oklch(0.18_0.04_255)] text-center">
         {isAdmin && editing === "name" ? (
           <input
@@ -296,6 +380,7 @@ function PriceRow({
           </span>
         )}
       </td>
+      {/* 파실때(이체) 가격 */}
       <td className={`${sellBg} px-1.5 md:px-3 py-3 text-xs md:text-sm text-center font-semibold text-[oklch(0.3_0.08_200)]`}>
         {isAdmin && editing === "sellPrice" ? (
           <input
@@ -320,6 +405,7 @@ function PriceRow({
           </span>
         )}
       </td>
+      {/* 파실때 할인율 */}
       <td className={`${sellBg} px-1 md:px-3 py-3 text-xs font-bold text-[oklch(0.3_0.08_200)] text-center`}>
         {isAdmin && editing === "sellDiscount" ? (
           <input
@@ -345,6 +431,7 @@ function PriceRow({
           </span>
         )}
       </td>
+      {/* 사실때(현금) 가격 */}
       <td className={`${buyBg} px-1.5 md:px-3 py-3 text-xs md:text-sm text-center font-semibold text-[oklch(0.3_0.08_10)]`}>
         {isAdmin && editing === "buyPrice" ? (
           <input
@@ -369,6 +456,7 @@ function PriceRow({
           </span>
         )}
       </td>
+      {/* 사실때 할인율 */}
       <td className={`${buyBg} px-1 md:px-3 py-3 text-xs font-bold text-[oklch(0.3_0.08_10)] text-center`}>
         {isAdmin && editing === "buyDiscount" ? (
           <input
@@ -394,6 +482,7 @@ function PriceRow({
           </span>
         )}
       </td>
+      {/* 비고 - 모바일에서 숨김 */}
       <td className="px-1.5 md:px-3 py-3 text-xs md:text-sm text-center text-muted-foreground hidden md:table-cell">
         {isAdmin && editing === "note" ? (
           <input
@@ -417,6 +506,7 @@ function PriceRow({
           </span>
         )}
       </td>
+      {/* 관리자 액션 */}
       {isAdmin && (
         <td className="px-1.5 md:px-3 py-3 text-center">
           <div className="flex items-center justify-center gap-1">
@@ -455,6 +545,7 @@ function PriceRow({
               onClick={onDelete}
               disabled={isLoading}
               className="text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+              title="행 삭제"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -470,7 +561,15 @@ export default function Home() {
   const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [editHeaderOpen, setEditHeaderOpen] = useState(false);
   const [addItemOpen, setAddItemOpen] = useState(false);
+  const [headerInfo, setHeaderInfo] = useState<HeaderInfo>({
+    title: "티켓나라 스타필드수원",
+    subtitle: "국내최대 상품권할인 전문거래소 - 티켓나라",
+    phone: "010-9650-5566",
+    hours: "10:00 ~ 19:00",
+    address: "수원시 장안구 수성로 157번길60 [브리시엘상가 133호]",
+  });
 
   // tRPC queries and mutations
   const { data: giftcards = [], isLoading: isLoadingGiftcards, refetch } = trpc.giftcards.list.useQuery();
@@ -484,6 +583,11 @@ export default function Home() {
   const handleLogout = () => {
     setIsAdmin(false);
     toast.success("편집 모드가 비활성화되었습니다.");
+  };
+
+  const handleSaveHeader = (info: HeaderInfo) => {
+    setHeaderInfo(info);
+    toast.success("헤더 정보가 저장되었습니다.");
   };
 
   const handleAddItem = async (item: Omit<GiftCardItem, "id" | "displayOrder">) => {
@@ -548,6 +652,7 @@ export default function Home() {
     try {
       await reorderMutation.mutateAsync({ orders });
       await refetch();
+      toast.success("순서가 변경되었습니다.");
     } catch (error) {
       toast.error("순서 변경에 실패했습니다.");
       console.error(error);
@@ -626,9 +731,20 @@ export default function Home() {
       {/* 스티키 헤더 */}
       <header className="sticky top-0 z-50 bg-gradient-to-r from-[oklch(0.18_0.04_255)] to-[oklch(0.25_0.04_255)] text-white shadow-md">
         <div className="container flex items-center justify-between py-3 md:py-4">
-          <h1 className="text-lg md:text-xl font-bold" style={{ color: "#ffa200", fontSize: "32px", fontWeight: "800" }}>
-            티켓나라 스타필드수원
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg md:text-xl font-bold" style={{ color: "#ffa200", fontSize: "32px", fontWeight: "800" }}>
+              {headerInfo.title}
+            </h1>
+            {isAdmin && (
+              <button
+                onClick={() => setEditHeaderOpen(true)}
+                className="text-white/60 hover:text-white transition-colors"
+                title="헤더 정보 수정"
+              >
+                <Edit3 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-2 md:gap-3">
             {isAdmin && (
               <>
@@ -661,7 +777,7 @@ export default function Home() {
               할인상품권 구입해서 알뜰쇼핑
             </h2>
             <p className="text-lg md:text-xl text-white/80 mb-6 md:mb-8" style={{ color: "#ffa200", fontWeight: "700" }}>
-              국내최대 상품권할인 전문거래소 - 티켓나라
+              {headerInfo.subtitle}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
               <div className="flex items-center gap-3 bg-white/10 rounded-lg p-4">
@@ -669,7 +785,7 @@ export default function Home() {
                 <div>
                   <p className="text-xs md:text-sm text-white/70">전화문의</p>
                   <p className="text-base md:text-lg font-semibold" style={{ color: "#ffae00", fontSize: "24px" }}>
-                    010-9650-5566
+                    {headerInfo.phone}
                   </p>
                 </div>
               </div>
@@ -678,7 +794,7 @@ export default function Home() {
                 <div>
                   <p className="text-xs md:text-sm text-white/70">영업시간</p>
                   <p className="text-base md:text-lg font-semibold" style={{ fontSize: "24px", color: "#ffa200" }}>
-                    10:00 ~ 19:00
+                    {headerInfo.hours}
                   </p>
                 </div>
               </div>
@@ -686,7 +802,7 @@ export default function Home() {
                 <MapPin className="w-5 h-5 md:w-6 md:h-6 text-[oklch(0.78_0.12_80)] flex-shrink-0" />
                 <div>
                   <p className="text-xs md:text-sm text-white/70">위치</p>
-                  <p className="text-sm md:text-base font-semibold">수원시 장안구 수성로 157번길60 [브리시엘상가 133호]</p>
+                  <p className="text-sm md:text-base font-semibold">{headerInfo.address}</p>
                 </div>
               </div>
               <a
@@ -774,12 +890,10 @@ export default function Home() {
                   <tbody className="divide-y divide-[oklch(0.92_0.005_255)]">
                     {categoryOrder.map((cat) => {
                       const items = groupedByCategory[cat] || [];
-                      if (items.length === 0) return null;
                       return (
                         <React.Fragment key={`cat-${cat}`}>
                           <tr className="bg-[oklch(0.93_0.01_255)]">
                             <td colSpan={isAdmin ? 7 : 6} className="px-3 md:px-6 py-2 text-xs font-bold text-[oklch(0.18_0.04_255)] uppercase tracking-wider">
-                              {cat}
                             </td>
                           </tr>
                           {items.map((item, idx) => {
@@ -807,22 +921,6 @@ export default function Home() {
                 </table>
               </div>
             </div>
-
-            {/* 지도 섹션 */}
-            <div className="mt-8 md:mt-12">
-              <div className="bg-white rounded-2xl border border-[oklch(0.88_0.01_255)] overflow-hidden shadow-sm">
-                <div className="bg-[oklch(0.18_0.04_255)] text-white px-4 md:px-6 py-4">
-                  <h3 className="text-xl md:text-2xl font-bold">오시는 길</h3>
-                </div>
-                <div className="p-4 md:p-6">
-                  <img
-                    src="/manus-storage/starfield-suwon-map_2785ec6d.jpg"
-                    alt="티켓나라 스타필드수원 위치 지도"
-                    className="w-full h-auto rounded-lg border-2 border-[oklch(0.78_0.12_80)]"
-                  />
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </main>
@@ -835,6 +933,13 @@ export default function Home() {
           setIsAdmin(true);
           setLoginOpen(false);
         }}
+      />
+      <EditHeaderDialog
+        open={editHeaderOpen}
+        onClose={() => setEditHeaderOpen(false)}
+        headerInfo={headerInfo}
+        onSave={handleSaveHeader}
+        isLoading={isLoading}
       />
       <AddItemDialog open={addItemOpen} onClose={() => setAddItemOpen(false)} onAdd={handleAddItem} isLoading={isLoading} />
     </div>
