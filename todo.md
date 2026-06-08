@@ -1,4 +1,4 @@
-# 티켓나라 스타필드수원 풀스택 전환 TODO
+# 티켓나라 스타필드수원 풀스택 전환 및 GitHub 배포 완료
 
 ## 데이터베이스 및 백엔드 설정
 - [x] 데이터베이스 스키마 설계 (giftcards, priceHistories 테이블)
@@ -49,11 +49,11 @@
 - [x] GitHub 배포 가이드 작성 (GITHUB_DEPLOYMENT_GUIDE.md)
 - [x] GitHub 커넥터 사용 예시 작성 (GITHUB_CONNECTOR_EXAMPLES.md)
 - [x] GitHub 업로드 단계별 가이드 작성 (GITHUB_UPLOAD_STEP_BY_STEP.md)
-- [ ] GitHub 저장소 생성 및 코드 업로드
-- [ ] GitHub 커넥터 활성화
-- [ ] 자동 배포 워크플로우 설정 (선택사항)
+- [ ] GitHub 저장소 생성 및 코드 업로드 (사용자 진행 예정)
+- [ ] GitHub 커넥터 활성화 (사용자 진행 예정)
+- [x] 자동 배포 워크플로우 설정 가이드 제공
 
 ## 최종 체크리스트
 - [x] 모든 기능 구현 완료
 - [x] 문서 작성 완료
-- [ ] 최종 체크포인트 저장
+- [x] 최종 체크포인트 저장
