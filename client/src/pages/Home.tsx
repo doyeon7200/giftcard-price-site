@@ -94,6 +94,18 @@ function AdminLoginDialog({
           <p className="text-sm text-muted-foreground">
             관리자 권한으로 로그인되었습니다. 편집 모드를 활성화하시겠습니까?
           </p>
+          <div>
+            <label className="text-sm font-medium">비밀번호</label>
+            <Input
+              type="password"
+              placeholder="관리자 비밀번호 입력"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleLogin();
+              }}
+            />
+          </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
         </div>
         <DialogFooter>
@@ -343,7 +355,7 @@ function PriceRow({
             className={`inline-flex items-center gap-1 ${isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}`}
             onClick={() => startEdit("sellDiscount", String(item.sellDiscount))}
           >
-            <span className="font-bold text-[oklch(0.3_0.08_200)]">{item.sellDiscount.toFixed(1)}%</span>
+            <span className="font-bold text-[oklch(0.3_0.08_200)]">{(item.sellDiscount / 100).toFixed(1)}%</span>
           </span>
         )}
       </td>
@@ -392,7 +404,7 @@ function PriceRow({
             className={`inline-flex items-center gap-1 ${isAdmin ? "cursor-text hover:underline decoration-dotted" : ""}`}
             onClick={() => startEdit("buyDiscount", String(item.buyDiscount))}
           >
-            <span className="font-bold text-[oklch(0.3_0.08_10)]">{item.buyDiscount.toFixed(1)}%</span>
+            <span className="font-bold text-[oklch(0.3_0.08_10)]">{(item.buyDiscount / 100).toFixed(1)}%</span>
           </span>
         )}
       </td>
@@ -633,15 +645,15 @@ export default function Home() {
   }, [giftcards]);
 
   const categoryOrder = [
-    "대형마트",
-    "모바일상품권",
-    "백화점",
-    "전자제품",
-    "할인점",
-    "주유소",
-    "음식점",
-    "문화",
     "기프트카드",
+    "문화",
+    "음식점",
+    "주유소",
+    "할인점",
+    "전자제품",
+    "백화점",
+    "모바일상품권",
+    "대형마트",
   ];
 
   if (authLoading) {

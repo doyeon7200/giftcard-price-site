@@ -138,13 +138,13 @@ export function EditableTradingInfo({ isAdmin, items, onSave }: EditableTradingI
           </button>
         )}
       </div>
-      <ul className="space-y-2 text-sm md:text-base text-center">
+      <div className="space-y-2 text-sm md:text-base text-center flex flex-col items-center justify-center">
         {items.map((item) => (
-          <li key={item.id} style={{ color: item.color, fontWeight: "700" }}>
+          <p key={item.id} style={{ color: item.color, fontWeight: "700" }} className="w-full">
             {item.text}
-          </li>
+          </p>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
